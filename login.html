@@ -2,31 +2,17 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Login Admin</title>
+    <title>Admin - Huerto</title>
     <style>
-        body { font-family: Arial; padding: 50px; text-align: center; }
-        input { padding: 10px; font-size: 18px; margin: 10px; width: 200px; }
-        button { padding: 10px 20px; font-size: 18px; background: green; color: white; border: none; cursor: pointer; }
+        body { font-family: Arial; padding: 20px; text-align: center; }
     </style>
 </head>
 <body>
-    <h1>🔐 ADMIN</h1>
-    <p>Contraseña: juan123</p>
-    <br>
-    <input type="password" id="pass" placeholder="Contraseña">
-    <br>
-    <button onclick="entrar()">ENTRAR</button>
+    <h1>📋 Admin Pedidos</h1>
+    <a href="admin.html" style="background: #386641; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-size: 18px;">
+        🔧 Ver Pedidos
+    </a>
     <br><br>
     <a href="index.html">← Volver a tienda</a>
-    <script>
-        function entrar() {
-            var p = document.getElementById('pass').value;
-            if (p === 'juan123') {
-                location.href = 'admin.html';
-            } else {
-                alert('ERROR: Contraseña incorrecta');
-            }
-        }
-    </script>
 </body>
 </html>

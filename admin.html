@@ -2,22 +2,24 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Admin - Pedidos</title>
+    <title>Admin - Pedidos Huerto</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        body { font-family: Arial; padding: 20px; }
+        body { font-family: Arial; padding: 20px; max-width: 800px; margin: 0 auto; }
         .pedido { background: #fff; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .vacio { text-align: center; color: #666; padding: 50px; }
+        button { background: #386641; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+        .btn-rojo { background: #c0392b; }
     </style>
 </head>
 <body>
     <nav style="margin-bottom: 20px;">
-        <a href="index.html" style="background: #386641; color: white; padding: 10px; text-decoration: none; border-radius: 4px;">🌱 Tienda</a>
+        <a href="index.html" style="background: #386641; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">🌱 Tienda</a>
     </nav>
     
     <h1>📋 Pedidos</h1>
-    <button onclick="cargar()" style="background: #386641; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">🔄 Recargar</button>
-    <button onclick="limpiar()" style="background: #c0392b; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">🗑️ Limpiar todo</button>
+    <button onclick="cargar()">🔄 Recargar</button>
+    <button onclick="limpiar()" class="btn-rojo">🗑️ Limpiar</button>
     
     <div id="pedidos"></div>
     
@@ -35,21 +37,29 @@
                 <div class="pedido">
                     <div><strong>${p.nombre}</strong></div>
                     <div>📞 ${p.telefono}</div>
-                    <div>📧 ${p.email || 'Sin email'}</div>
+                    <div>📧 ${p.email || '-'}</div>
                     <div>📍 ${p.direccion}</div>
                     <div>📅 ${new Date(p.fecha || Date.now()).toLocaleString()}</div>
                     <hr>
                     ${(p.productos || []).map(pr => `
                         <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #eee;">
-                            <span>${pr.nombre || pr.productos}</span>
-                            <span>${(pr.precio * (pr.cantidad || 1)).toFixed(2)} €</span>
+                            <span>${pr}</span>
                         </div>
                     `).join('')}
                     <div style="margin-top:10px;font-weight:bold;font-size:18px;">
                         💰 Total: ${Number(p.total || 0).toFixed(2)} €
                     </div>
+                    <button onclick="borrar(${i})" style="margin-top:10px;background:#c0392b;">🗑️</button>
                 </div>
             `).join('');
+        }
+        
+        function borrar(i) {
+            if (!confirm('Borrar pedido?')) return;
+            const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
+            pedidos.splice(i, 1);
+            localStorage.setItem('pedidos', JSON.stringify(pedidos));
+            cargar();
         }
         
         function limpiar() {
