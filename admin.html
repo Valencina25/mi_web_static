@@ -203,13 +203,18 @@
         document.addEventListener('DOMContentLoaded', () => {
             populateImagenSelect();
             renderAdminProductos();
-            loadPedidos();
+            
+            setTimeout(loadPedidos, 1000);
         });
         
         async function loadPedidos() {
             try {
-                const pedidos = await getPedidos();
+                console.log('Cargando pedidos...');
+                const pedidos = await window.getPedidos();
+                console.log('Pedidos:', pedidos);
                 const container = document.getElementById('pedidos-lista');
+                
+                if (!container) return;
                 
                 if (pedidos.length === 0) {
                     container.innerHTML = '<p style="color: var(--color-text-light);">No hay pedidos aún</p>';
@@ -240,8 +245,9 @@
                     </div>
                 `).join('');
             } catch (error) {
+                console.error('Error carga pedidos:', error);
                 document.getElementById('pedidos-lista').innerHTML = 
-                    '<p style="color: var(--color-error);">Error al cargar pedidos</p>';
+                    '<p style="color: var(--color-error);">Error al cargar pedidos: ' + error.message + '</p>';
             }
         }
     </script>
