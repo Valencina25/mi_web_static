@@ -16,12 +16,13 @@ async function initFirebase() {
     
     initializeApp(firebaseConfig);
     db = getFirestore();
+    return { addDoc, collection, getDocs, query, orderBy };
 }
 
-async function guardarPedido(carrito, total, nombre, telefono, direccion) {
+window.guardarPedido = async function(carrito, total, nombre, telefono, direccion) {
     if (!db) await initFirebase();
     
-    const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+    const { addDoc, collection } = await initFirebase();
     
     const pedido = {
         productos: carrito,
@@ -34,17 +35,17 @@ async function guardarPedido(carrito, total, nombre, telefono, direccion) {
     };
     
     await addDoc(collection(db, "pedidos"), pedido);
-}
+};
 
-async function getPedidos() {
+window.getPedidos = async function() {
     if (!db) await initFirebase();
     
-    const { getDocs, collection, query, orderBy } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+    const { getDocs, collection, query, orderBy } = await initFirebase();
     
     const q = query(collection(db, "pedidos"), orderBy("fecha", "desc"));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-}
+};
 
 const productosDefault = [
     { id: 2, nombre: 'pimiento italiano', precio: 3.0, imagen: 'uploads/pimiento italiano.jpg', categoria: 'verduras' },
