@@ -341,9 +341,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const contactoForm = document.getElementById('contacto-form');
     if (contactoForm) {
         contactoForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            showFlash('Gracias por tu mensaje. Te contactaremos pronto.', 'success');
-            contactoForm.reset();
+            const submitBtn = contactoForm.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.textContent = 'Enviando...';
+                submitBtn.disabled = true;
+            }
         });
     }
 
