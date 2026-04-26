@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Huerto de Juan</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+    <div id="flash-container" class="flash-messages" role="alert" aria-live="polite"></div>
+
+    <header class="header" role="banner">
+        <div class="container">
+            <a href="index.html" class="logo">🌱 Admin</a>
+            <nav class="nav-list" style="display: flex; gap: var(--space-md);">
+                <a href="index.html" class="nav-link">🏠 Tienda</a>
+                <a href="#" class="nav-link" onclick="logoutAdmin()">🚪 Salir</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="section">
+        <div class="container">
+            <h1 class="section-title">🧑‍🌾 Panel de Administración</h1>
+
+            <div style="max-width: 600px; margin: 0 auto var(--space-2xl);">
+                <div class="producto" style="padding: var(--space-xl);">
+                    <h2 style="margin-bottom: var(--space-lg);">➕ Añadir Producto</h2>
+
+                    <form id="add-product-form">
+                        <div class="form-group">
+                            <label for="nombre">Nombre del producto</label>
+                            <input type="text" id="nombre" name="nombre" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="precio">Precio (€)</label>
+                            <input type="number" id="precio" name="precio" step="0.01" min="0" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="categoria">Categoría</label>
+                            <select id="categoria" name="categoria" class="form-input" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="verduras">Verduras</option>
+                                <option value="frutas">Frutas</option>
+                                <option value="hortalizas">Hortalizas</option>
+                                <option value="legumbres">Legumbres</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="imagen">Imagen</label>
+                            <select id="imagen" name="imagen" class="form-input" required>
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Crear Producto</button>
+                    </form>
+                </div>
+            </div>
+
+            <h2 class="section-title">📦 Productos (<span id="product-count">0</span>)</h2>
+
+            <div class="productos-grid" id="admin-productos">
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function getAdminPassword() {
+            return localStorage.getItem('admin_password') || '';
+        }
+
+        function setAdminPassword(pwd) {
+            localStorage.setItem('admin_password', pwd);
+        }
+
+        function logoutAdmin() {
+            localStorage.removeItem('admin_password');
+            window.location.href = 'login.html';
+        }
+
+        function populateImagenSelect() {
+            const imagenes = [
+                'pimiento italiano.jpg',
+                'cebollino.jpg',
+                'berejena morada.jpg',
+                'calabazin negro.jpg',
+                'cebolla.jpg',
+                'puerro.jpg',
+                'zanohoria.jpg',
+                'aguacate.jpg',
+                'espinaca.jpg',
+                'patata.jpg',
+                'acelga.jpg',
+                'lechuga.jpg',
+                'ajos.jpg',
+                'tomate rosa.jpg',
+                'fresa.jpg',
+                'pera.jpg',
+                'naranja.jpg',
+                'albaricoque.jpg'
+            ];
+            const select = document.getElementById('imagen');
+            imagenes.forEach(img => {
+                const option = document.createElement('option');
+                option.value = 'uploads/' + img;
+                option.textContent = img;
+                select.appendChild(option);
+            });
+        }
+
+        function getProductos() {
+            const stored = localStorage.getItem('productos_admin');
+            if (stored) return JSON.parse(stored);
+            return [
+                { id: 2, nombre: 'pimiento italiano', precio: 3.0, imagen: 'uploads/pimiento italiano.jpg', categoria: 'verduras' },
+                { id: 3, nombre: 'cebollino', precio: 2.0, imagen: 'uploads/cebollino.jpg', categoria: 'verduras' },
+                { id: 4, nombre: 'berejana morada', precio: 2.0, imagen: 'uploads/berejena morada.jpg', categoria: 'verduras' },
+                { id: 5, nombre: 'calabazin', precio: 2.0, imagen: 'uploads/calabazin negro.jpg', categoria: 'verduras' },
+                { id: 6, nombre: 'cebolla', precio: 2.0, imagen: 'uploads/cebolla.jpg', categoria: 'verduras' },
+                { id: 7, nombre: 'puerro', precio: 2.0, imagen: 'uploads/puerro.jpg', categoria: 'verduras' },
+                { id: 8, nombre: 'zanahoria', precio: 1.0, imagen: 'uploads/zanohoria.jpg', categoria: 'verduras' },
+                { id: 9, nombre: 'aguacate', precio: 5.0, imagen: 'uploads/aguacate.jpg', categoria: 'verduras' },
+                { id: 10, nombre: 'espinaca', precio: 2.0, imagen: 'uploads/espinaca.jpg', categoria: 'verduras' },
+                { id: 11, nombre: 'patata', precio: 1.0, imagen: 'uploads/patata.jpg', categoria: 'verduras' },
+                { id: 12, nombre: 'acelga', precio: 2.0, imagen: 'uploads/acelga.jpg', categoria: 'verduras' },
+                { id: 13, nombre: 'lechuga', precio: 1.5, imagen: 'uploads/lechuga.jpg', categoria: 'verduras' },
+                { id: 16, nombre: 'ajos', precio: 6.0, imagen: 'uploads/ajos.jpg', categoria: 'verduras' },
+                { id: 17, nombre: 'Tomate rosa', precio: 4.0, imagen: 'uploads/tomate rosa.jpg', categoria: 'verduras' },
+                { id: 18, nombre: 'fresa', precio: 5.0, imagen: 'uploads/fresa.jpg', categoria: 'frutas' },
+                { id: 19, nombre: 'pera', precio: 2.8, imagen: 'uploads/pera.jpg', categoria: 'frutas' }
+            ];
+        }
+
+        function saveProductos(productos) {
+            localStorage.setItem('productos_admin', JSON.stringify(productos));
+        }
+
+        function renderAdminProductos() {
+            const productos = getProductos();
+            const container = document.getElementById('admin-productos');
+            const countSpan = document.getElementById('product-count');
+
+            if (countSpan) countSpan.textContent = productos.length;
+
+            container.innerHTML = productos.map(p => `
+                <article class="producto">
+                    <img src="${p.imagen}" alt="${p.nombre}" class="producto-img" loading="lazy">
+                    <div class="producto-content">
+                        <h3 class="producto-title">${p.nombre}</h3>
+                        <p class="producto-categoria">${p.categoria}</p>
+                        <p class="producto-precio">${p.precio} €</p>
+                        <button class="btn btn-outline" onclick="deleteProducto(${p.id})">
+                            🗑️ Eliminar
+                        </button>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        function deleteProducto(id) {
+            if (!confirm('¿Eliminar este producto?')) return;
+            let productos = getProductos();
+            productos = productos.filter(p => p.id !== id);
+            saveProductos(productos);
+            renderAdminProductos();
+            showFlash('Producto eliminado', 'success');
+        }
+
+        document.getElementById('add-product-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre').value;
+            const precio = parseFloat(document.getElementById('precio').value);
+            const categoria = document.getElementById('categoria').value;
+            const imagen = document.getElementById('imagen').value;
+
+            const productos = getProductos();
+            const newId = productos.length > 0 ? Math.max(...productos.map(p => p.id)) + 1 : 1;
+
+            productos.push({ id: newId, nombre, precio, imagen, categoria });
+            saveProductos(productos);
+
+            renderAdminProductos();
+            e.target.reset();
+            showFlash('Producto añadido', 'success');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateImagenSelect();
+            renderAdminProductos();
+        });
+    </script>
+</body>
+</html>
