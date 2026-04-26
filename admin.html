@@ -6,7 +6,7 @@
     <title>Admin - Huerto de Juan</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
     <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
+    <script src="script.js" type="module"></script>
 </head>
 
 <body>
@@ -25,6 +25,15 @@
     <main class="section">
         <div class="container">
             <h1 class="section-title">🧑‍🌾 Panel de Administración</h1>
+
+            <div class="productos-grid" style="margin-top: var(--space-xl);">
+                <div class="producto" style="padding: var(--space-lg); background: var(--color-card);">
+                    <h2 style="margin-bottom: var(--space-md);">📦 Pedidos Recientes</h2>
+                    <div id="pedidos-lista"></div>
+                </div>
+            </div>
+
+            <h2 class="section-title" style="margin-top: var(--space-2xl);">➕ Añadir Producto</h2>
 
             <div style="max-width: 600px; margin: 0 auto var(--space-2xl);">
                 <div class="producto" style="padding: var(--space-xl);">
@@ -194,7 +203,47 @@
         document.addEventListener('DOMContentLoaded', () => {
             populateImagenSelect();
             renderAdminProductos();
+            loadPedidos();
         });
+        
+        async function loadPedidos() {
+            try {
+                const pedidos = await getPedidos();
+                const container = document.getElementById('pedidos-lista');
+                
+                if (pedidos.length === 0) {
+                    container.innerHTML = '<p style="color: var(--color-text-light);">No hay pedidos aún</p>';
+                    return;
+                }
+                
+                container.innerHTML = pedidos.map(p => `
+                    <div style="background: var(--color-bg-secondary); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-md);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm);">
+                            <strong>${p.nombre}</strong>
+                            <span style="font-size: var(--text-lg); font-weight: bold; color: var(--color-primary);">${p.total.toFixed(2)} €</span>
+                        </div>
+                        <p style="font-size: var(--text-sm); margin-bottom: var(--space-xs);">
+                            <strong>📞</strong> ${p.telefono}
+                        </p>
+                        <p style="font-size: var(--text-sm); margin-bottom: var(--space-xs);">
+                            <strong>📍</strong> ${p.direccion}
+                        </p>
+                        <p style="font-size: var(--text-sm); color: var(--color-text-light);">
+                            <strong>📅</strong> ${new Date(p.fecha).toLocaleString('es-ES')}
+                        </p>
+                        <details style="margin-top: var(--space-sm);">
+                            <summary style="cursor: pointer; font-size: var(--text-sm); color: var(--color-primary);">Ver productos</summary>
+                            <ul style="margin-top: var(--space-sm); padding-left: var(--space-md);">
+                                ${p.productos.map(prod => `<li style="font-size: var(--text-sm);">${prod.nombre} x${prod.cantidad || 1}</li>`).join('')}
+                            </ul>
+                        </details>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('pedidos-lista').innerHTML = 
+                    '<p style="color: var(--color-error);">Error al cargar pedidos</p>';
+            }
+        }
     </script>
 </body>
 </html>
