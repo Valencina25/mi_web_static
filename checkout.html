@@ -110,9 +110,18 @@
             const direccion = document.getElementById('direccion').value;
 
             try {
-                console.log('Enviando pedido...');
-                await window.guardarPedido(carrito, total, nombre, telefono, direccion);
-                console.log('Pedido guardado');
+                const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
+                pedidos.unshift({
+                    id: Date.now(),
+                    productos: carousel,
+                    total,
+                    nombre,
+                    telefono,
+                    direccion,
+                    fecha: new Date().toISOString(),
+                    estado: 'pendiente'
+                });
+                localStorage.setItem('pedidos', JSON.stringify(pedidos));
                 
                 localStorage.setItem('carrito', '[]');
                 document.getElementById('checkout-section').style.display = 'none';
