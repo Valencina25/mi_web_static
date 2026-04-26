@@ -18,7 +18,7 @@
 <body>
     <div id="login" style="text-align: center; padding: 50px;">
         <h1>🔐 Admin</h1>
-        <input type="password" id="pass" placeholder="Contraseña" style="width: 200px;">
+        <input type="password" id="pass" placeholder="Admin" style="width: 200px;">
         <br><br>
         <button onclick="entrar()">Entrar</button>
     </div>
@@ -71,14 +71,10 @@
         }
         
         function entrar() {
-            if (document.getElementById('pass').value === 'juan123') {
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('admin').style.display = 'block';
-                cargar();
-                renderProds();
-            } else {
-                alert('Contraseña incorrecta');
-            }
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('admin').style.display = 'block';
+            cargar();
+            renderProds();
         }
         
         function cerrar() {
