@@ -66,9 +66,9 @@
                 fecha: new Date().toISOString(),
                 estado: 'nuevo'
             };
-            const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
+            const pedidos = JSON.parse(localStorage.getItem('my_orders') || '[]');
             pedidos.unshift(pedido);
-            localStorage.setItem('pedidos', JSON.stringify(pedidos));
+            localStorage.setItem('my_orders', JSON.stringify(pedidos));
             localStorage.setItem('carrito', '[]');
         }
     </script>

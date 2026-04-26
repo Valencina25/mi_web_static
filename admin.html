@@ -2,150 +2,143 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Admin - Huerto</title>
+    <title>Admin - Huerto de Juan</title>
     <style>
-        body { font-family: Arial; padding: 20px; max-width: 900px; margin: 0 auto; background: #f5f5dc; }
-        #login { text-align: center; padding: 100px 0; }
-        #login input { padding: 10px; font-size: 18px; width: 200px; }
-        #login button { padding: 10px 20px; font-size: 18px; background: #386641; color: white; border: none; cursor: pointer; }
-        .pedido { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 20px 0; }
-        .prod { background: #f5f5f5; padding: 10px; border-radius: 8px; text-align: center; }
-        input, select { width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; }
-        button { background: #386641; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-rojo { background: #c0392b; }
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #f5f5dc; }
+        #login-area { text-align: center; padding: 80px 20px; }
+        #login-area input { padding: 12px; font-size: 16px; width: 180px; margin: 10px 0; }
+        #login-area button { padding: 12px 24px; font-size: 16px; background-color: #2d5a3d; color: white; border: none; cursor: pointer; }
+        .main-content { display: none; }
+        .product-card { background: white; padding: 15px; margin: 5px; border-radius: 8px; display: inline-block; text-align: center; width: 140px; }
+        .order-card { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .btn-green { background-color: #2d5a3d; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .btn-red { background-color: #c0392b; color: white; padding: 8px 16px; border: none; cursor: pointer; }
+        nav { margin-bottom: 20px; }
+        nav a, nav button { margin-right: 10px; }
     </style>
 </head>
 <body>
-    <div id="login">
-        <h1>🔐 Admin</h1>
+    <div id="login-area">
+        <h1>🔐 Admin - Entrar</h1>
+        <input type="password" id="password" placeholder="Contraseña">
         <br>
-        <input type="password" id="pass" placeholder="••••••••">
-        <br><br>
-        <button onclick="entrar()">Entrar</button>
-        <br><br>
-        <a href="index.html" style="color:#386641;">← Volver a tienda</a>
+        <button onclick="login()">Entrar</button>
     </div>
     
-    <div id="admin" style="display: none;">
-        <nav style="margin-bottom: 20px;">
-            <a href="index.html" style="background:#386641;color:white;padding:10px 15px;text-decoration:none;border-radius:4px;">🌱 Tienda</a>
-            <button onclick="cerrar()" class="btn-rojo" style="margin-left:10px;">Salir</button>
+    <div id="main-area" class="main-content">
+        <nav>
+            <a href="index.html" style="background:#2d5a3d;color:white;padding:10px 20px;text-decoration:none;border-radius:4px;">🌱 Tienda</a>
+            <button onclick="logout()" class="btn-red">🚪 Salir</button>
         </nav>
         
         <h2>📦 Productos</h2>
-        <div class="grid" id="lista-prods"></div>
+        <div id="products-list"></div>
         
-        <details style="background:white;padding:15px;border-radius:8px;">
-            <summary style="cursor:pointer;font-weight:bold;">➕ Nuevo Producto</summary>
-            <input type="text" id="new-nombre" placeholder="Nombre">
-            <input type="number" id="new-precio" placeholder="Precio" step="0.1">
-            <select id="new-cat"><option value="verduras">Verduras</option><option value="frutas">Frutas</option></select>
-            <input type="text" id="new-img" placeholder="img/foto.jpg">
-            <button onclick="nuevoProd()">Guardar</button>
+        <details style="background:white;padding:15px;margin:10px 0;border-radius:8px;">
+            <summary style="cursor:pointer;font-weight:bold;">➕ Añadir Producto</summary>
+            <input type="text" id="prod-name" placeholder="Nombre" style="width:100%;padding:8px;margin:5px 0;">
+            <input type="number" id="prod-price" placeholder="Precio" step="0.1" style="width:100%;padding:8px;margin:5px 0;">
+            <select id="prod-cat" style="width:100%;padding:8px;margin:5px 0;">
+                <option value="verduras">Verduras</option>
+                <option value="frutas">Frutas</option>
+            </select>
+            <input type="text" id="prod-img" placeholder="img/foto.jpg" style="width:100%;padding:8px;margin:5px 0;">
+            <button onclick="addProduct()" class="btn-green">Guardar</button>
         </details>
         
         <h2 style="margin-top:30px;">📋 Pedidos</h2>
-        <button onclick="cargar()">Recargar</button>
-        <button onclick="limpiarTodo()" class="btn-rojo">Limpiar</button>
-        <div id="pedidos"></div>
+        <button onclick="loadOrders()" class="btn-green">🔄 Recargar</button>
+        <button onclick="clearOrders()" class="btn-red">Limpiar Todo</button>
+        <div id="orders-list"></div>
     </div>
     
     <script>
-        const password = 'juan123';
-        
-        const productosDefault = [
-            { id:2,nombre:'pimiento italiano',precio:3,categoria:'verduras',imagen:'img/pimiento italiano.jpg' },
-            { id:3,nombre:'cebollino',precio:2,categoria:'verduras',imagen:'img/cebollino.jpg' },
-            { id:4,nombre:'berenjena morada',precio:2,categoria:'verduras',imagen:'img/berejena morada.jpg' },
-            { id:13,nombre:'lechuga',precio:1.5,categoria:'verduras',imagen:'img/lechuga.jpg' },
-            { id:18,nombre:'fresa',precio:5,categoria:'frutas',imagen:'img/fresa.jpg' },
-            { id:19,nombre:'pera',precio:2.8,categoria:'frutas',imagen:'img/pera.jpg' }
+        const PASS = 'juan123';
+        const DEFAULT_PRODUCTS = [
+            {id:2,name:'Pimiento',price:3,cat:'verduras',img:'img/pimiento italiano.jpg'},
+            {id:3,name:'Cebollino',price:2,cat:'verduras',img:'img/cebollino.jpg'},
+            {id:13,name:'Lechuga',price:1.5,cat:'verduras',img:'img/lechuga.jpg'},
+            {id:18,name:'Fresa',price:5,cat:'frutas',img:'img/fresa.jpg'},
+            {id:19,name:'Pera',price:2.8,cat:'frutas',img:'img/pera.jpg'}
         ];
         
-        function getProductos() { return JSON.parse(localStorage.getItem('productos')) || productosDefault; }
-        function guardarProds(ps) { localStorage.setItem('productos', JSON.stringify(ps)); }
+        function getProds() { return JSON.parse(localStorage.getItem('my_products')) || DEFAULT_PRODUCTS; }
+        function saveProds(p) { localStorage.setItem('my_products', JSON.stringify(p)); }
         
-        function entrar() {
-            if (document.getElementById('pass').value === password) {
-                sessionStorage.setItem('adminOk', 'si');
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('admin').style.display = 'block';
+        function login() {
+            if(document.getElementById('password').value === PASS) {
+                sessionStorage.setItem('admin_logged', 'yes');
+                document.getElementById('login-area').style.display = 'none';
+                document.getElementById('main-area').style.display = 'block';
                 renderProds();
-                cargar();
+                loadOrders();
             } else {
-                alert('Contraseña incorrecta');
+                alert('❌ Contraseña incorrecta');
             }
         }
         
-        function cerrar() {
-            sessionStorage.removeItem('adminOk');
+        function logout() {
+            sessionStorage.removeItem('admin_logged');
             location.reload();
         }
         
         function renderProds() {
-            const ps = getProductos();
-            document.getElementById('lista-prods').innerHTML = ps.map((p,i) =>
-                '<div class="prod"><b>'+p.nombre+'</b><br>'+p.precio+'€<br><small>'+p.categoria+'</small><br><button onclick="borrarProd('+i+')" class="btn-rojo">🗑️</button></div>'
+            let p = getProds();
+            document.getElementById('products-list').innerHTML = p.map((pr,i) =>
+                '<div class="product-card"><b>'+pr.name+'</b><br>'+pr.price+'€<br><small>'+pr.cat+'</small><br><button onclick="delProd('+i+')" class="btn-red">🗑</button></div>'
             ).join('');
         }
         
-        function nuevoProd() {
-            const nombre = document.getElementById('new-nombre').value;
-            const precio = parseFloat(document.getElementById('new-precio').value);
-            if (!nombre || !precio) return alert('Faltan datos');
-            const ps = getProductos();
-            ps.push({id:Date.now(), nombre, precio, categoria:document.getElementById('new-cat').value, imagen:document.getElementById('new-img').value||'img/'+nombre.toLowerCase().replace(/ /g,'')+'.jpg'});
-            guardarProds(ps);
-            alert('Guardado');
-            document.getElementById('new-nombre').value = '';
-            document.getElementById('new-precio').value = '';
+        function addProduct() {
+            let n = document.getElementById('prod-name').value;
+            let pr = parseFloat(document.getElementById('prod-price').value);
+            if(!n || !pr) return alert('Escribe nombre y precio');
+            let p = getProds();
+            p.push({id:Date.now(), name:n, price:pr, cat:document.getElementById('prod-cat').value, img:document.getElementById('prod-img').value || 'img/'+n.toLowerCase().replace(/ /g,'')+'.jpg'});
+            saveProds(p);
+            alert('✅ Guardado');
+            document.getElementById('prod-name').value = '';
+            document.getElementById('prod-price').value = '';
             renderProds();
         }
         
-        function borrarProd(i) {
-            if (confirm('Borrar?')) {
-                const ps = getProductos();
-                ps.splice(i, 1);
-                guardarProds(ps);
-                renderProds();
-            }
+        function delProd(i) {
+            if(!confirm('Borrar?')) return;
+            let p = getProds();
+            p.splice(i,1);
+            saveProds(p);
+            renderProds();
         }
         
-        function cargar() {
-            const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
-            const div = document.getElementById('pedidos');
-            if (pedidos.length === 0) {
-                div.innerHTML = '<p>No hay pedidos</p>';
-                return;
-            }
-            div.innerHTML = pedidos.map((p,i) =>
-                '<div class="pedido"><strong>'+p.nombre+'</strong> - '+p.telefono+'<br>📧 '+(p.email||'-')+'<br>📍 '+p.direccion+'<br>📅 '+new Date(p.fecha||Date.now()).toLocaleString()+'<hr>'+(p.productos||[]).map(pr=>'<div>'+pr+'</div>').join('')+'<div style="margin-top:10px;font-weight:bold;">Total: '+Number(p.total||0).toFixed(2)+'€</div><button onclick="borrarPedido('+i+')" class="btn-rojo">🗑️</button></div>'
+        function loadOrders() {
+            let o = JSON.parse(localStorage.getItem('my_orders') || '[]');
+            let d = document.getElementById('orders-list');
+            if(o.length === 0) { d.innerHTML = '<p>No hay pedidos</p>'; return; }
+            d.innerHTML = o.map((or,j) =>
+                '<div class="order-card"><b>'+or.name+'</b> - '+or.phone+'<br>📧 '+(or.email||'-')+'<br>📍 '+or.address+'<br>📅 '+new Date(or.date||Date.now()).toLocaleString()+'<hr>'+(or.items||[]).map(it=>'<div>'+it+'</div>').join('')+'<div><b>Total: '+Number(or.total||0).toFixed(2)+'€</b></div><button onclick="delOrder('+j+')" class="btn-red">🗑</button></div>'
             ).join('');
         }
         
-        function borrarPedido(i) {
-            if (confirm('Borrar pedido?')) {
-                const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
-                pedidos.splice(i, 1);
-                localStorage.setItem('pedidos', JSON.stringify(pedidos));
-                cargar();
-            }
+        function delOrder(j) {
+            if(!confirm('Borrar pedido?')) return;
+            let o = JSON.parse(localStorage.getItem('my_orders') || '[]');
+            o.splice(j,1);
+            localStorage.setItem('my_orders', JSON.stringify(o));
+            loadOrders();
         }
         
-        function limpiarTodo() {
-            if (confirm('Borrar TODOS los pedidos?')) {
-                localStorage.removeItem('pedidos');
-                cargar();
-            }
+        function clearOrders() {
+            if(!confirm('Borrar TODOS los pedidos?')) return;
+            localStorage.removeItem('my_orders');
+            loadOrders();
         }
         
         // Check session
-        if (sessionStorage.getItem('adminOk') === 'si') {
-            document.getElementById('login').style.display = 'none';
-            document.getElementById('admin').style.display = 'block';
+        if(sessionStorage.getItem('admin_logged') === 'yes') {
+            document.getElementById('login-area').style.display = 'none';
+            document.getElementById('main-area').style.display = 'block';
             renderProds();
-            cargar();
+            loadOrders();
         }
     </script>
 </body>
