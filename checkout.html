@@ -2,55 +2,65 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Checkout</title>
+    <title>Checkout - Huerto de Juan</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <nav>
             <a href="index.html">🌱 Huerto</a>
-            <a href="carrito.html">Carrito</a>
+            <a href="carrito.html">🛒 Carrito</a>
         </nav>
     </header>
     
-    <main>
-        <h1>Confirmar Pedido</h1>
+    <main style="padding: 20px; max-width: 500px; margin: 0 auto;">
+        <h1>📝 Confirmar Pedido</h1>
         
-        <p>Total: <strong id="total">0 €</strong></p>
+        <p>Total a pagar: <strong id="total">0 €</strong></p>
         
-        <form id="form">
-            <input type="text" id="nombre" placeholder="Nombre completo" required>
-            <input type="tel" id="telefono" placeholder="Teléfono" required>
-            <textarea id="direccion" placeholder="Dirección" required></textarea>
-            <button type="submit">Confirmar</button>
+        <form action="https://formspree.io/f/mwvazjng" method="POST">
+            <input type="hidden" name="productos" id="productos">
+            <input type="hidden" name="total" id="campo-total">
+            
+            <label>Nombre completo</label>
+            <input type="text" name="nombre" required>
+            
+            <label>Email</label>
+            <input type="email" name="email" required>
+            
+            <label>Teléfono</label>
+            <input type="tel" name="telefono" required>
+            
+            <label>Dirección de entrega</label>
+            <textarea name="direccion" required></textarea>
+            
+            <button type="submit">✅ Confirmar Pedido</button>
         </form>
+        
+        <div id="ok" style="display:none; text-align: center;">
+            <h2>✅ Pedido Enviado!</h2>
+            <p>Nos pondremos en contacto contigo.</p>
+            <a href="index.html">Volver a la tienda</a>
+        </div>
     </main>
     
     <script>
         const carousel = JSON.parse(localStorage.getItem('carrito')) || [];
         const total = carousel.reduce((a, p) => a + (p.precio * (p.cantidad || 1)), 0);
-        document.getElementById('total').textContent = total.toFixed(2) + ' €';
         
-        document.getElementById('form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const data = {
-                productos: carousel,
-                total,
-                nombre: document.getElementById('nombre').value,
-                telefono: document.getElementById('telefono').value,
-                direccion: document.getElementById('direccion').value
-            };
-            
-            await fetch('/api/pedidos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            
-            localStorage.setItem('carrito', '[]');
-            alert('Pedido enviado!');
-            location.href = '/index.html';
+        document.getElementById('total').textContent = total.toFixed(2) + ' €';
+        document.getElementById('campo-total').value = total.toFixed(2) + ' €';
+        document.getElementById('productos').value = carousel.map(p => 
+            `${p.nombre} x${p.cantidad || 1} = ${(p.precio * (p.cantidad || 1)).toFixed(2)} €`
+        ).join('\n');
+        
+        const form = document.querySelector('form');
+        form.addEventListener('submit', () => {
+            setTimeout(() => {
+                localStorage.setItem('carrito', '[]');
+                form.style.display = 'none';
+                document.getElementById('ok').style.display = 'block';
+            }, 1000);
         });
     </script>
 </body>
