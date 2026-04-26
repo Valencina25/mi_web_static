@@ -332,10 +332,10 @@ document.addEventListener('DOMContentLoaded', () => {
         new Slider(slider, wrapper);
     }
 
+    renderProductos();
     new Filtros();
     new MobileMenu();
 
-    renderProductos();
     renderCarrito();
 
     const contactoForm = document.getElementById('contacto-form');
