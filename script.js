@@ -9,20 +9,19 @@ const firebaseConfig = {
 };
 
 // Firebase SDK
-let db;
+let app, db;
+
 async function initFirebase() {
-    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
-    const { getFirestore, collection, addDoc, getDocs, query, orderBy } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
-    
-    initializeApp(firebaseConfig);
-    db = getFirestore();
-    return { addDoc, collection, getDocs, query, orderBy };
+    if (app) return;
+    const { initializeApp: init } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
+    const { getFirestore } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+    app = init(firebaseConfig);
+    db = getFirestore(app);
 }
 
 window.guardarPedido = async function(carrito, total, nombre, telefono, direccion) {
-    if (!db) await initFirebase();
-    
-    const { addDoc, collection } = await initFirebase();
+    await initFirebase();
+    const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
     
     const pedido = {
         productos: carrito,
@@ -34,13 +33,12 @@ window.guardarPedido = async function(carrito, total, nombre, telefono, direccio
         estado: 'pendiente'
     };
     
-    await addDoc(collection(db, "pedidos"), pedido);
+    return addDoc(collection(db, "pedidos"), pedido);
 };
 
 window.getPedidos = async function() {
-    if (!db) await initFirebase();
-    
-    const { getDocs, collection, query, orderBy } = await initFirebase();
+    await initFirebase();
+    const { getDocs, collection, query, orderBy } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
     
     const q = query(collection(db, "pedidos"), orderBy("fecha", "desc"));
     const snapshot = await getDocs(q);

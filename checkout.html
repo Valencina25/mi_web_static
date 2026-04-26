@@ -110,14 +110,17 @@
             const direccion = document.getElementById('direccion').value;
 
             try {
-                await guardarPedido(carrito, total, nombre, telefono, direccion);
+                console.log('Enviando pedido...');
+                await window.guardarPedido(carrito, total, nombre, telefono, direccion);
+                console.log('Pedido guardado');
                 
                 localStorage.setItem('carrito', '[]');
                 document.getElementById('checkout-section').style.display = 'none';
                 document.getElementById('checkout-success').style.display = 'block';
                 document.getElementById('checkout-total-confirmed').textContent = total.toFixed(2);
             } catch (error) {
-                alert('Error al enviar el pedido. Inténtalo de nuevo.');
+                console.error('Error:', error);
+                alert('Error al enviar el pedido: ' + error.message);
                 btn.textContent = '✅ Confirmar Pedido';
                 btn.disabled = false;
             }
