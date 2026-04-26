@@ -2,139 +2,56 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finalizar Pedido - Huerto de Juan</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+    <title>Checkout</title>
     <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
 </head>
-
 <body>
-    <div id="flash-container" class="flash-messages" role="alert" aria-live="polite"></div>
-
-    <header class="header" role="banner">
-        <div class="container">
-            <a href="index.html" class="logo" aria-label="Huerto de Juan - Ir a inicio">
-                🌱 Huerto de Juan
-            </a>
-
-            <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="main-nav">
-                ☰
-            </button>
-
-            <nav id="main-nav" class="nav-list" role="navigation" aria-label="Menú principal">
-                <a href="index.html" class="nav-link">🏠 Inicio</a>
-                <a href="index.html#productos" class="nav-link">🌱 Productos</a>
-                <a href="carrito.html" class="nav-link">🛒 Carrito</a>
-            </nav>
-        </div>
+    <header>
+        <nav>
+            <a href="index.html">🌱 Huerto</a>
+            <a href="carrito.html">Carrito</a>
+        </nav>
     </header>
-
-    <main class="section" style="min-height: 80vh;">
-        <div class="container" style="max-width: 600px;">
-            <div id="checkout-section">
-                <div class="producto" style="padding: var(--space-2xl);">
-                    <span style="font-size: 4rem; display: block; margin-bottom: var(--space-lg);">🛒</span>
-
-                    <h1 style="margin-bottom: var(--space-lg); text-align: center;">Finalizar Pedido</h1>
-
-                    <p style="font-size: var(--text-lg); margin-bottom: var(--space-lg); text-align: center;">
-                        Total: <strong><span id="checkout-total">0</span> €</strong>
-                    </p>
-
-                    <form id="pedido-form" style="display: flex; flex-direction: column; gap: var(--space-md);">
-                        <div class="form-group">
-                            <label for="nombre">Nombre completo *</label>
-                            <input type="text" id="nombre" name="nombre" class="form-input" required placeholder="Ej: María García">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="telefono">Teléfono *</label>
-                            <input type="tel" id="telefono" name="telefono" class="form-input" required placeholder="Ej: 652 864 678">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="direccion">Dirección de entrega *</label>
-                            <textarea id="direccion" name="direccion" class="form-textarea" required placeholder="Ej: Calle Example, 123, Piso 2, Sevilla" style="min-height: 80px;"></textarea>
-                        </div>
-
-                        <button type="submit" id="checkout-btn" class="btn btn-primary" style="margin-top: var(--space-md);">
-                            ✅ Confirmar Pedido
-                        </button>
-                    </form>
-
-                    <p style="text-align: center; margin-top: var(--space-md);">
-                        <a href="carrito.html" style="color: var(--color-primary);">← Volver al carrito</a>
-                    </p>
-                </div>
-            </div>
-
-            <div id="checkout-success" class="producto" style="padding: var(--space-2xl); display: none; text-align: center;">
-                <span style="font-size: 4rem; display: block; margin-bottom: var(--space-lg);">✅</span>
-
-                <h1 style="margin-bottom: var(--space-md);">¡Pedido Recibido!</h1>
-
-                <p style="font-size: var(--text-lg); margin-bottom: var(--space-lg);">
-                    Gracias por tu pedido. Te contactaremos pronto para confirmar la entrega 🚚
-                </p>
-
-                <div style="background: var(--color-bg); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-lg);">
-                    <p class="producto-precio" style="font-size: var(--text-2xl);">
-                        Total: <span id="checkout-total-confirmed">0</span> €
-                    </p>
-                </div>
-
-                <a href="index.html" class="btn btn-primary">
-                    🛒 Seguir Comprando
-                </a>
-            </div>
-        </div>
+    
+    <main>
+        <h1>Confirmar Pedido</h1>
+        
+        <p>Total: <strong id="total">0 €</strong></p>
+        
+        <form id="form">
+            <input type="text" id="nombre" placeholder="Nombre completo" required>
+            <input type="tel" id="telefono" placeholder="Teléfono" required>
+            <textarea id="direccion" placeholder="Dirección" required></textarea>
+            <button type="submit">Confirmar</button>
+        </form>
     </main>
-
+    
     <script>
-        document.getElementById('checkout-total').textContent = 
-            localStorage.getItem('carrito') ? 
-            JSON.parse(localStorage.getItem('carrito')).reduce((acc, p) => acc + (p.precio * (p.cantidad || 1)), 0).toFixed(2) : '0';
-
-        document.getElementById('pedido-form').addEventListener('submit', async (e) => {
+        const carousel = JSON.parse(localStorage.getItem('carrito')) || [];
+        const total = carousel.reduce((a, p) => a + (p.precio * (p.cantidad || 1)), 0);
+        document.getElementById('total').textContent = total.toFixed(2) + ' €';
+        
+        document.getElementById('form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const btn = document.getElementById('checkout-btn');
-            btn.textContent = 'Enviando...';
-            btn.disabled = true;
-
-            const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-            const total = carrito.reduce((acc, p) => acc + (p.precio * (p.cantidad || 1)), 0);
-            const nombre = document.getElementById('nombre').value;
-            const telefono = document.getElementById('telefono').value;
-            const direccion = document.getElementById('direccion').value;
-
-            try {
-                const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
-                pedidos.unshift({
-                    id: Date.now(),
-                    productos: carousel,
-                    total,
-                    nombre,
-                    telefono,
-                    direccion,
-                    fecha: new Date().toISOString(),
-                    estado: 'pendiente'
-                });
-                localStorage.setItem('pedidos', JSON.stringify(pedidos));
-                
-                localStorage.setItem('carrito', '[]');
-                document.getElementById('checkout-section').style.display = 'none';
-                document.getElementById('checkout-success').style.display = 'block';
-                document.getElementById('checkout-total-confirmed').textContent = total.toFixed(2);
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error al enviar el pedido: ' + error.message);
-                btn.textContent = '✅ Confirmar Pedido';
-                btn.disabled = false;
-            }
+            const data = {
+                productos: carousel,
+                total,
+                nombre: document.getElementById('nombre').value,
+                telefono: document.getElementById('telefono').value,
+                direccion: document.getElementById('direccion').value
+            };
+            
+            await fetch('/api/pedidos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            localStorage.setItem('carrito', '[]');
+            alert('Pedido enviado!');
+            location.href = '/index.html';
         });
     </script>
-
 </body>
 </html>

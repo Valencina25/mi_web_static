@@ -4,24 +4,22 @@
     <meta charset="UTF-8">
     <title>Admin - Pedidos</title>
     <style>
-        body { font-family: Arial; padding: 20px; max-width: 800px; margin: 0 auto; }
+        body { font-family: Arial; padding: 20px; }
         .pedido { background: #fff; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        button { background: #386641; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
-        .btn-rojo { background: #c0392b; }
+        button { background: #386641; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div style="display:flex;gap:10px;margin-bottom:20px;">
-        <a href="index.html" style="background:#386641;color:white;padding:10px;text-decoration:none;border-radius:4px;">🌱 Tienda</a>
-    </div>
+    <a href="index.html">🌱 Tienda</a>
     
     <h1>📋 Pedidos</h1>
     <button onclick="cargar()">🔄 Recargar</button>
     <div id="pedidos"></div>
     
     <script>
-        function cargar() {
-            const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
+        async function cargar() {
+            const res = await fetch('/api/pedidos');
+            const pedidos = await res.json();
             const div = document.getElementById('pedidos');
             
             if (pedidos.length === 0) {
@@ -29,31 +27,16 @@
                 return;
             }
             
-            div.innerHTML = pedidos.map((p, i) => `
+            div.innerHTML = pedidos.map(p => `
                 <div class="pedido">
                     <div><strong>${p.nombre}</strong> - ${p.telefono}</div>
-                    <div style="font-size:14px;color:#666;">${p.direccion}</div>
-                    <div style="font-size:12px;color:#999;">${new Date(p.fecha).toLocaleString()}</div>
-                    <span class="estado">${p.estado}</span>
-                    <button class="btn-rojo" onclick="borrar(${i})">🗑️</button>
+                    <div>${p.direccion}</div>
+                    <div>${new Date(p.fecha).toLocaleString()}</div>
                     <hr>
-                    ${p.productos.map(pr => `
-                        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
-                            <span>${pr.nombre} x${pr.cantidad || 1}</span>
-                            <span>${(pr.precio * (pr.cantidad || 1)).toFixed(2)} €</span>
-                        </div>
-                    `).join('')}
-                    <div style="margin-top:10px;font-weight:bold;">Total: ${Number(p.total).toFixed(2)} €</div>
+                    ${p.productos.map(pr => `<div>${pr.nombre} x${pr.cantidad || 1} = ${(pr.precio * (pr.cantidad || 1)).toFixed(2)} €</div>`).join('')}
+                    <div><strong>Total: ${Number(p.total).toFixed(2)} €</strong></div>
                 </div>
             `).join('');
-        }
-        
-        function borrar(i) {
-            if (!confirm('Borrar pedido?')) return;
-            const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
-            pedidos.splice(i, 1);
-            localStorage.setItem('pedidos', JSON.stringify(pedidos));
-            cargar();
         }
         
         cargar();
