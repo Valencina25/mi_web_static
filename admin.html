@@ -3,152 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin - Huerto</title>
-    <link rel="stylesheet" href="style.css">
     <style>
-        body { font-family: Arial; padding: 20px; max-width: 900px; margin: 0 auto; }
-        .pedido { background: #fff; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        body { font-family: Arial; padding: 20px; max-width: 900px; margin: 0 auto; background: #f5f5dc; }
+        .pedido { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 20px 0; }
         .prod { background: #f5f5f5; padding: 10px; border-radius: 8px; text-align: center; }
-        input, select, textarea { width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; }
-        button { background: #386641; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        input, select { width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; }
+        button { background: #386641; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
         .btn-rojo { background: #c0392b; }
-        .btn-azul { background: #2980b9; }
     </style>
 </head>
 <body>
     <div id="login" style="text-align: center; padding: 50px;">
         <h1>🔐 Admin</h1>
-        <input type="password" id="pass" placeholder="Admin" style="width: 200px;">
+        <input type="password" id="pass" placeholder="••••••••">
         <br><br>
         <button onclick="entrar()">Entrar</button>
     </div>
     
     <div id="admin" style="display: none;">
         <nav style="margin-bottom: 20px;">
-            <a href="index.html" style="background: #386641; color: white; padding: 10px; text-decoration: none; border-radius: 4px;">🌱 Tienda</a>
-            <button onclick="cerrar()" class="btn-rojo">🚪 Salir</button>
+            <a href="index.html" style="background:#386641;color:white;padding:10px;text-decoration:none;border-radius:4px;">🌱 Tienda</a>
+            <button onclick="cerrar()" class="btn-rojo">Salir</button>
         </nav>
         
-        <h2>📦 Productos (Gestionar)</h2>
+        <h2>📦 Productos</h2>
         <div class="grid" id="lista-prods"></div>
         
-        <details style="background: #f5f5f5; padding: 15px; border-radius: 8px;">
-            <summary style="cursor:pointer;font-weight:bold;">➕ Nuevo Producto</summary>
+        <details style="background:white;padding:15px;border-radius:8px;">
+            <summary style="cursor:pointer;font-weight:bold;">➕ Nuevo</summary>
             <input type="text" id="new-nombre" placeholder="Nombre">
             <input type="number" id="new-precio" placeholder="Precio" step="0.1">
-            <select id="new-cat">
-                <option value="verduras">Verduras</option>
-                <option value="frutas">Frutas</option>
-            </select>
-            <input type="text" id="new-img" placeholder="Imagen (img/nombre.jpg)">
-            <button onclick="nuevoProd()" class="btn-azul">💾 Guardar</button>
+            <select id="new-cat"><option value="verduras">Verduras</option><option value="frutas">Frutas</option></select>
+            <input type="text" id="new-img" placeholder="img/foto.jpg">
+            <button onclick="nuevoProd()">Guardar</button>
         </details>
         
-        <h2 style="margin-top: 30px;">📋 Pedidos</h2>
-        <button onclick="cargar()">🔄 Recargar</button>
+        <h2 style="margin-top:30px;">📋 Pedidos</h2>
+        <button onclick="cargar()">Recargar</button>
         <div id="pedidos"></div>
     </div>
     
     <script>
-        // Productos por defecto
+        // Password codificada: juan123 → no visible direktamente
+        const passCodificada = 'anVhbjEyMw==';
+        
         const productosDefault = [
-            { id: 2, nombre: 'pimiento italiano', precio: 3, categoria: 'verduras', imagen: 'img/pimiento italiano.jpg' },
-            { id: 3, nombre: 'cebollino', precio: 2, categoria: 'verduras', imagen: 'img/cebollino.jpg' },
-            { id: 4, nombre: 'berenjena morada', precio: 2, categoria: 'verduras', imagen: 'img/berejena morada.jpg' },
-            { id: 5, nombre: 'calabazin', precio: 2, categoria: 'verduras', imagen: 'img/calabazin negro.jpg' },
-            { id: 6, nombre: 'cebolla', precio: 2, categoria: 'verduras', imagen: 'img/cebolla.jpg' },
-            { id: 13, nombre: 'lechuga', precio: 1.5, categoria: 'verduras', imagen: 'img/lechuga.jpg' },
-            { id: 18, nombre: 'fresa', precio: 5, categoria: 'frutas', imagen: 'img/fresa.jpg' },
-            { id: 19, nombre: 'pera', precio: 2.8, categoria: 'frutas', imagen: 'img/pera.jpg' }
+            { id:2,nombre:'pimiento italiano',precio:3,categoria:'verduras',imagen:'img/pimiento italiano.jpg' },
+            { id:3,nombre:'cebollino',precio:2,categoria:'verduras',imagen:'img/cebollino.jpg' },
+            { id:4,nombre:'berenjena morada',precio:2,categoria:'verduras',imagen:'img/berejena morada.jpg' },
+            { id:13,nombre:'lechuga',precio:1.5,categoria:'verduras',imagen:'img/lechuga.jpg' },
+            { id:18,nombre:'fresa',precio:5,categoria:'frutas',imagen:'img/fresa.jpg' },
+            { id:19,nombre:'pera',precio:2.8,categoria:'frutas',imagen:'img/pera.jpg' }
         ];
         
-        function getProductos() {
-            return JSON.parse(localStorage.getItem('productos')) || productosDefault;
-        }
-        
-        function guardarProds(ps) {
-            localStorage.setItem('productos', JSON.stringify(ps));
-        }
+        function getProductos() { return JSON.parse(localStorage.getItem('productos')) || productosDefault; }
+        function guardarProds(ps) { localStorage.setItem('productos', JSON.stringify(ps)); }
         
         function entrar() {
-            document.getElementById('login').style.display = 'none';
-            document.getElementById('admin').style.display = 'block';
-            cargar();
-            renderProds();
+            const input = document.getElementById('pass').value;
+            if (btoa(input) === passCodificada) {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('admin').style.display = 'block';
+                cargar();
+                renderProds();
+            } else {
+                alert('❌ Contraseña incorrecta');
+            }
         }
         
-        function cerrar() {
-            location.reload();
-        }
+        function cerrar() { location.reload(); }
         
         function renderProds() {
             const ps = getProductos();
-            const div = document.getElementById('lista-prods');
-            div.innerHTML = ps.map((p, i) => `
-                <div class="prod">
-                    <b>${p.nombre}</b><br>
-                    <span>${p.precio} €</span><br>
-                    <small>${p.categoria}</small><br>
-                    <button onclick="borrarProd(${i})" class="btn-rojo" style="padding: 5px 10px;">🗑️</button>
-                </div>
-            `).join('');
+            document.getElementById('lista-prods').innerHTML = ps.map((p,i) =>
+                '<div class="prod"><b>'+p.nombre+'</b><br>'+p.precio+'€<br><button onclick="borrarProd('+i+')" class="btn-rojo">🗑️</button></div>'
+            ).join('');
         }
         
         function nuevoProd() {
             const nombre = document.getElementById('new-nombre').value;
             const precio = parseFloat(document.getElementById('new-precio').value);
-            const cat = document.getElementById('new-cat').value;
-            const img = document.getElementById('new-img').value || 'img/' + nombre.toLowerCase().replace(/ /g, '') + '.jpg';
-            
             if (!nombre || !precio) return alert('Faltan datos');
-            
             const ps = getProductos();
-            ps.push({ id: Date.now(), nombre, precio, categoria: cat, imagen: img });
+            ps.push({id:Date.now(), nombre, precio, categoria:document.getElementById('new-cat').value, imagen:document.getElementById('new-img').value||'img/'+nombre.toLowerCase().replace(/ /g,'')+'.jpg'});
             guardarProds(ps);
-            
-            alert('Producto guardado');
-            document.getElementById('new-nombre').value = '';
-            document.getElementById('new-precio').value = '';
+            alert('Guardado');
             renderProds();
         }
         
         function borrarProd(i) {
-            if (!confirm('Borrar producto?')) return;
-            const ps = getProductos();
-            ps.splice(i, 1);
-            guardarProds(ps);
-            renderProds();
+            if (confirm('Borrar?')) {
+                const ps = getProductos();
+                ps.splice(i, 1);
+                guardarProds(ps);
+                renderProds();
+            }
         }
         
         function cargar() {
             const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
             const div = document.getElementById('pedidos');
-            
             if (pedidos.length === 0) {
                 div.innerHTML = '<p>No hay pedidos</p>';
                 return;
             }
-            
-            div.innerHTML = pedidos.map((p, i) => `
-                <div class="pedido">
-                    <div><strong>${p.nombre}</strong> - ${p.telefono}</div>
-                    <div>📧 ${p.email || '-'}</div>
-                    <div>📍 ${p.direccion}</div>
-                    <div>📅 ${new Date(p.fecha || Date.now()).toLocaleString()}</div>
-                    <hr>
-                    ${(p.productos || []).map(pr => `<div>${pr}</div>`).join('')}
-                    <div style="margin-top:10px;font-weight:bold;">💰 Total: ${Number(p.total || 0).toFixed(2)} €</div>
-                    <button onclick="borrarPedido(${i})" class="btn-rojo" style="margin-top:10px;">🗑️</button>
-                </div>
-            `).join('');
+            div.innerHTML = pedidos.map((p,i) =>
+                '<div class="pedido"><strong>'+p.nombre+'</strong> - '+p.telefono+'<br>📧 '+(p.email||'-')+'<br>📍 '+p.direccion+'<br>📅 '+new Date(p.fecha||Date.now()).toLocaleString()+'<hr>'+(p.productos||[]).map(pr=>'<div>'+pr+'</div>').join('')+'<div><strong>Total: '+Number(p.total||0).toFixed(2)+'€</strong></div><button onclick="borrarPedido('+i+')" class="btn-rojo">🗑️</button></div>'
+            ).join('');
         }
         
         function borrarPedido(i) {
-            if (!confirm('Borrar pedido?')) return;
-            const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
-            pedidos.splice(i, 1);
-            localStorage.setItem('pedidos', JSON.stringify(pedidos));
-            cargar();
+            if (confirm('Borrar pedido?')) {
+                const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
+                pedidos.splice(i, 1);
+                localStorage.setItem('pedidos', JSON.stringify(pedidos));
+                cargar();
+            }
         }
     </script>
 </body>
