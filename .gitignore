@@ -1,0 +1,15 @@
+index.html
+admin.html
+checkout.html
+carrito.html
+login.html
+script.js
+style.css
+img/
+dist/
+public/
+pedidos.json
+pedidos.php
+server.cjs
+server.mjs
+public/
