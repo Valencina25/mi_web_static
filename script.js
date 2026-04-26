@@ -1,3 +1,51 @@
+// Firebase config
+const firebaseConfig = {
+    apiKey: "AIzaSyBdnHxrIgvUIW_078qF72DPChXmgKvURAw",
+    authDomain: "mi-web-static.firebaseapp.com",
+    projectId: "mi-web-static",
+    storageBucket: "mi-web-static.firebasestorage.app",
+    messagingSenderId: "761835869165",
+    appId: "1:761835869165:web:64e92e55bbdba3fb614de4"
+};
+
+// Firebase SDK
+let db;
+async function initFirebase() {
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
+    const { getFirestore, collection, addDoc, getDocs, query, orderBy } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+    
+    initializeApp(firebaseConfig);
+    db = getFirestore();
+}
+
+async function guardarPedido(carrito, total, nombre, telefono, direccion) {
+    if (!db) await initFirebase();
+    
+    const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+    
+    const pedido = {
+        productos: carrito,
+        total: total,
+        nombre: nombre,
+        telefono: telefono,
+        direccion: direccion,
+        fecha: new Date().toISOString(),
+        estado: 'pendiente'
+    };
+    
+    await addDoc(collection(db, "pedidos"), pedido);
+}
+
+async function getPedidos() {
+    if (!db) await initFirebase();
+    
+    const { getDocs, collection, query, orderBy } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+    
+    const q = query(collection(db, "pedidos"), orderBy("fecha", "desc"));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+
 const productosDefault = [
     { id: 2, nombre: 'pimiento italiano', precio: 3.0, imagen: 'uploads/pimiento italiano.jpg', categoria: 'verduras' },
     { id: 3, nombre: 'cebollino', precio: 2.0, imagen: 'uploads/cebollino.jpg', categoria: 'verduras' },
