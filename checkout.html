@@ -18,7 +18,7 @@
         
         <p>Total a pagar: <strong id="total">0 €</strong></p>
         
-        <form action="https://formspree.io/f/mwvazjng" method="POST" onsubmit="alert('✅ Pedido enviado! Te contactaremos pronto.');">
+        <form action="https://formspree.io/f/mwvazjng" method="POST" onsubmit="guardarLocal(); setTimeout(() => alert('Pedido enviado!'), 100)">
             <input type="hidden" name="productos" id="productos">
             <input type="hidden" name="total" id="campo-total">
             
@@ -34,12 +34,12 @@
             <label>Dirección de entrega</label>
             <textarea name="direccion" required></textarea>
             
-            <button type="submit">✅ Confirmar Pedido</button>
+            <button type="submit" onclick="guardarLocal()">✅ Confirmar Pedido</button>
         </form>
         
-        <div id="ok" style="display:none; text-align: center;">
-            <h2>✅ Pedido Enviado!</h2>
-            <p>Nos pondremos en contacto contigo.</p>
+        <div id="ok" style="display:none; text-align: center; padding: 20px;">
+            <h2 style="color: green;">✅ Pedido Enviado!</h2>
+            <p>Te enviaremos un email de confirmación.</p>
             <a href="index.html">Volver a la tienda</a>
         </div>
     </main>
@@ -54,10 +54,23 @@
             `${p.nombre} x${p.cantidad || 1} = ${(p.precio * (p.cantidad || 1)).toFixed(2)} €`
         ).join('\n');
         
-        const form = document.querySelector('form');
-        form.addEventListener('submit', () => {
+        function guardarLocal() {
+            const pedido = {
+                id: Date.now(),
+                productos: carousel.map(p => `${p.nombre} x${p.cantidad || 1}`),
+                total: total,
+                nombre: document.querySelector('input[name="nombre"]').value,
+                email: document.querySelector('input[name="email"]').value,
+                telefono: document.querySelector('input[name="telefono"]').value,
+                direccion: document.querySelector('textarea[name="direccion"]').value,
+                fecha: new Date().toISOString(),
+                estado: 'nuevo'
+            };
+            const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
+            pedidos.unshift(pedido);
+            localStorage.setItem('pedidos', JSON.stringify(pedidos));
             localStorage.setItem('carrito', '[]');
-        });
+        }
     </script>
 </body>
 </html>
