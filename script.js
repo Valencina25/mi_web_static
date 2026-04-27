@@ -33,7 +33,7 @@ function addCarrito(producto) {
     showMsg('Añadido al carrito');
 }
 
-function getMsg(texto) {
+function showMsg(texto) {
     const div = document.createElement('div');
     div.style.cssText = 'position:fixed;top:20px;right:20px;background:#386641;color:white;padding:10px 20px;border-radius:8px;z-index:9999;';
     div.textContent = texto;
@@ -47,6 +47,10 @@ function removeCarrito(id) {
     saveCarrito(items);
 }
 
+function vaciarCarrito() {
+    localStorage.removeItem('carrito');
+}
+
 window.addCarritoById = function(id) {
     const p = getProductos().find(x => x.id === id);
     if (p) addCarrito(p);
@@ -54,10 +58,10 @@ window.addCarritoById = function(id) {
 
 let filtroActual = 'todos';
 
-window.filtrar = function(cat) {
+window.filtrar = function(cat, event) {
     filtroActual = cat;
     document.querySelectorAll('.filtro-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    if (event && event.target) event.target.classList.add('active');
     render();
 }
 

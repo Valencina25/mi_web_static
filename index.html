@@ -101,9 +101,9 @@
                 <h2 id="productos-title" class="section-title">🌱 Productos</h2>
 
                 <div class="filtros" role="group" aria-label="Filtrar productos">
-                    <button class="filtro-btn active" data-filter="todos">Todos</button>
-                    <button class="filtro-btn" data-filter="verduras">Verduras</button>
-                    <button class="filtro-btn" data-filter="frutas">Frutas</button>
+                    <button class="filtro-btn active" data-filter="todos" onclick="filtrar('todos', event)">Todos</button>
+                    <button class="filtro-btn" data-filter="verduras" onclick="filtrar('verduras', event)">Verduras</button>
+                    <button class="filtro-btn" data-filter="frutas" onclick="filtrar('frutas', event)">Frutas</button>
                 </div>
 
                 <div class="productos-grid" id="productos-container" role="list">

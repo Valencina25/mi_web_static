@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Checkout - Huerto de Juan</title>
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
     <header>
@@ -18,23 +19,23 @@
         
         <p>Total a pagar: <strong id="total">0 €</strong></p>
         
-        <form action="https://formspree.io/f/mwvazjng" method="POST" onsubmit="guardarLocal(); setTimeout(() => alert('Pedido enviado!'), 100)">
+        <form action="https://formspree.io/f/mwvazjng" method="POST" onsubmit="guardarLocal()">
             <input type="hidden" name="productos" id="productos">
             <input type="hidden" name="total" id="campo-total">
-            
+
             <label>Nombre completo</label>
             <input type="text" name="nombre" required>
-            
+
             <label>Email</label>
             <input type="email" name="email" required>
-            
+
             <label>Teléfono</label>
             <input type="tel" name="telefono" required>
-            
+
             <label>Dirección de entrega</label>
             <textarea name="direccion" required></textarea>
-            
-            <button type="submit" onclick="guardarLocal()">✅ Confirmar Pedido</button>
+
+            <button type="submit">✅ Confirmar Pedido</button>
         </form>
         
         <div id="ok" style="display:none; text-align: center; padding: 20px;">
@@ -46,30 +47,33 @@
     
     <script>
         const carousel = JSON.parse(localStorage.getItem('carrito')) || [];
-        const total = carousel.reduce((a, p) => a + (p.precio * (p.cantidad || 1)), 0);
-        
+        const total = carousel.reduce((a, p) => a + ((p.precio || 0) * (p.cantidad || 1)), 0);
+
         document.getElementById('total').textContent = total.toFixed(2) + ' €';
         document.getElementById('campo-total').value = total.toFixed(2) + ' €';
-        document.getElementById('productos').value = carousel.map(p => 
-            `${p.nombre} x${p.cantidad || 1} = ${(p.precio * (p.cantidad || 1)).toFixed(2)} €`
+        document.getElementById('productos').value = carousel.map(p =>
+            `${p.nombre || p.nombre} x${p.cantidad || 1} = ${((p.precio || 0) * (p.cantidad || 1)).toFixed(2)} €`
         ).join('\n');
-        
+
+        if (carousel.length === 0) {
+            document.querySelector('form').innerHTML = '<p style="text-align:center;">Tu carrito está vacío</p><a href="index.html">Volver a la tienda</a>';
+        }
+
         function guardarLocal() {
             const pedido = {
                 id: Date.now(),
-                productos: carousel.map(p => `${p.nombre} x${p.cantidad || 1}`),
-                total: total,
-                nombre: document.querySelector('input[name="nombre"]').value,
+                name: document.querySelector('input[name="nombre"]').value,
+                phone: document.querySelector('input[name="telefono"]').value,
                 email: document.querySelector('input[name="email"]').value,
-                telefono: document.querySelector('input[name="telefono"]').value,
-                direccion: document.querySelector('textarea[name="direccion"]').value,
-                fecha: new Date().toISOString(),
-                estado: 'nuevo'
+                address: document.querySelector('textarea[name="direccion"]').value,
+                items: carousel.map(p => `${p.nombre} x${p.cantidad || 1}`),
+                total: total,
+                date: Date.now()
             };
             const pedidos = JSON.parse(localStorage.getItem('my_orders') || '[]');
             pedidos.unshift(pedido);
             localStorage.setItem('my_orders', JSON.stringify(pedidos));
-            localStorage.setItem('carrito', '[]');
+            localStorage.removeItem('carrito');
         }
     </script>
 </body>
