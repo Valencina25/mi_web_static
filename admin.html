@@ -55,15 +55,18 @@
     <script>
         const PASS = 'juan123';
         const DEFAULT_PRODUCTS = [
-            {id:2,name:'Pimiento',price:3,cat:'verduras',img:'img/pimiento italiano.jpg'},
+            {id:2,name:'Pimiento italiano',price:3,cat:'verduras',img:'img/pimiento italiano.jpg'},
             {id:3,name:'Cebollino',price:2,cat:'verduras',img:'img/cebollino.jpg'},
+            {id:4,name:'Berenjena morada',price:2,cat:'verduras',img:'img/berejena morada.jpg'},
+            {id:5,name:'Calabazin',price:2,cat:'verduras',img:'img/calabazin negro.jpg'},
+            {id:6,name:'Cebolla',price:2,cat:'verduras',img:'img/cebolla.jpg'},
             {id:13,name:'Lechuga',price:1.5,cat:'verduras',img:'img/lechuga.jpg'},
             {id:18,name:'Fresa',price:5,cat:'frutas',img:'img/fresa.jpg'},
             {id:19,name:'Pera',price:2.8,cat:'frutas',img:'img/pera.jpg'}
         ];
-        
-        function getProds() { return JSON.parse(localStorage.getItem('my_products')) || DEFAULT_PRODUCTS; }
-        function saveProds(p) { localStorage.setItem('my_products', JSON.stringify(p)); }
+
+        function getProds() { return JSON.parse(localStorage.getItem('productos')) || DEFAULT_PRODUCTS; }
+        function saveProds(p) { localStorage.setItem('productos', JSON.stringify(p)); }
         
         function login() {
             if(document.getElementById('password').value === PASS) {
