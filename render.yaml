@@ -1,4 +1,3 @@
-# Render config
 services:
   - type: web
     name: mi-web-static
