@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - Huerto de Juan</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
@@ -52,7 +53,7 @@
         document.getElementById('total').textContent = total.toFixed(2) + ' €';
         document.getElementById('campo-total').value = total.toFixed(2) + ' €';
         document.getElementById('productos').value = carousel.map(p =>
-            `${p.nombre || p.nombre} x${p.cantidad || 1} = ${((p.precio || 0) * (p.cantidad || 1)).toFixed(2)} €`
+            `${p.nombre} x${p.cantidad || 1} = ${((p.precio || 0) * (p.cantidad || 1)).toFixed(2)} €`
         ).join('\n');
 
         if (carousel.length === 0) {
@@ -61,19 +62,25 @@
 
         function guardarLocal() {
             const pedido = {
-                id: Date.now(),
                 name: document.querySelector('input[name="nombre"]').value,
                 phone: document.querySelector('input[name="telefono"]').value,
                 email: document.querySelector('input[name="email"]').value,
                 address: document.querySelector('textarea[name="direccion"]').value,
                 items: carousel.map(p => `${p.nombre} x${p.cantidad || 1}`),
-                total: total,
-                date: Date.now()
+                total: total
             };
-            const pedidos = JSON.parse(localStorage.getItem('my_orders') || '[]');
-            pedidos.unshift(pedido);
-            localStorage.setItem('my_orders', JSON.stringify(pedidos));
-            localStorage.removeItem('carrito');
+            fetch('/api/pedidos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pedido)
+            }).then(() => {
+                localStorage.removeItem('carrito');
+            }).catch(() => {
+                const pedidos = JSON.parse(localStorage.getItem('my_orders') || '[]');
+                pedidos.unshift({ id: Date.now(), ...pedido, fecha: new Date().toISOString() });
+                localStorage.setItem('my_orders', JSON.stringify(pedidos));
+                localStorage.removeItem('carrito');
+            });
         }
     </script>
 </body>

@@ -1,8 +1,9 @@
 const productosDefault = [
-    { id: 2, nombre: 'pimiento italiano', precio: 3, imagen: 'img/pimiento italiano.jpg', categoria: 'verduras' },
+    { id: 1, nombre: 'tomate', precio: 3, imagen: 'img/tomate.jpg', categoria: 'verduras' },
+    { id: 2, nombre: 'pimiento italiano', precio: 3, imagen: 'img/pimiento.jpg', categoria: 'verduras' },
     { id: 3, nombre: 'cebollino', precio: 2, imagen: 'img/cebollino.jpg', categoria: 'verduras' },
-    { id: 4, nombre: 'berenjena morada', precio: 2, imagen: 'img/berejena morada.jpg', categoria: 'verduras' },
-    { id: 5, nombre: 'calabazin', precio: 2, imagen: 'img/calabazin negro.jpg', categoria: 'verduras' },
+    { id: 4, nombre: 'berejena morada', precio: 2, imagen: 'img/berejena.jpg', categoria: 'verduras' },
+    { id: 5, nombre: 'calabazin', precio: 2, imagen: 'img/calabazin.jpg', categoria: 'verduras' },
     { id: 6, nombre: 'cebolla', precio: 2, imagen: 'img/cebolla.jpg', categoria: 'verduras' },
     { id: 13, nombre: 'lechuga', precio: 1.5, imagen: 'img/lechuga.jpg', categoria: 'verduras' },
     { id: 18, nombre: 'fresa', precio: 5, imagen: 'img/fresa.jpg', categoria: 'frutas' },
@@ -10,7 +11,29 @@ const productosDefault = [
 ];
 
 function getProductos() {
-    return JSON.parse(localStorage.getItem('productos')) || productosDefault;
+    let productos = JSON.parse(localStorage.getItem('productos'));
+    if (!productos) {
+        localStorage.setItem('productos', JSON.stringify(productosDefault));
+        return productosDefault;
+    }
+    productos = productos.map(p => {
+        if (p.imagen) {
+            p.imagen = p.imagen.replace(/ /g, '_');
+        }
+        if (p.nombre && !p.name) {
+            p.nombre = p.nombre;
+        }
+        if (p.name && !p.nombre) {
+            p.nombre = p.name;
+            p.precio = p.price || p.precio;
+            p.imagen = p.img || p.imagen;
+            p.categoria = p.cat || p.categoria;
+            delete p.name; delete p.price; delete p.img; delete p.cat;
+        }
+        return p;
+    });
+    localStorage.setItem('productos', JSON.stringify(productos));
+    return productos;
 }
 
 function getCarrito() {
@@ -72,7 +95,7 @@ function render() {
         const filtrados = filtroActual === 'todos' ? ps : ps.filter(p => p.categoria === filtroActual);
         container.innerHTML = filtrados.map(p => `
             <article class="producto">
-                <img src="${p.imagen}" alt="${p.nombre}">
+                <img src="${p.imagen}" alt="${p.nombre}" class="producto-img">
                 <div class="producto-content">
                     <h3>${p.nombre}</h3>
                     <p>${p.categoria}</p>

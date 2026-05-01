@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Huerto de Juan v2</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #f5f5dc; }
@@ -35,35 +36,42 @@
         <div id="products-list"></div>
         
         <details style="background:white;padding:15px;margin:10px 0;border-radius:8px;">
-            <summary style="cursor:pointer;font-weight:bold;">➕ Añadir Producto</summary>
-            <input type="text" id="prod-name" placeholder="Nombre" style="width:100%;padding:8px;margin:5px 0;">
-            <input type="number" id="prod-price" placeholder="Precio" step="0.1" style="width:100%;padding:8px;margin:5px 0;">
-            <select id="prod-cat" style="width:100%;padding:8px;margin:5px 0;">
-                <option value="verduras">Verduras</option>
-                <option value="frutas">Frutas</option>
-            </select>
-            <input type="text" id="prod-img" placeholder="img/foto.jpg" style="width:100%;padding:8px;margin:5px 0;">
-            <button onclick="addProduct()" class="btn-green">Guardar</button>
-        </details>
+             <summary style="cursor:pointer;font-weight:bold;">➕ Añadir Producto</summary>
+             <input type="text" id="prod-name" placeholder="Nombre" style="width:100%;padding:8px;margin:5px 0;" oninput="updateImgPreview()">
+             <input type="number" id="prod-price" placeholder="Precio" step="0.1" style="width:100%;padding:8px;margin:5px 0;">
+             <select id="prod-cat" style="width:100%;padding:8px;margin:5px 0;">
+                 <option value="verduras">Verduras</option>
+                 <option value="frutas">Frutas</option>
+             </select>
+             <input type="text" id="prod-img" placeholder="img/foto.jpg" style="width:100%;padding:8px;margin:5px 0;" oninput="updateImgPreview()">
+             <div id="img-preview" style="margin:5px 0;text-align:center;"></div>
+             <button onclick="addProduct()" class="btn-green">Guardar</button>
+             <button onclick="cancelEdit()" class="btn-red" style="display:none;" id="btn-cancel">Cancelar</button>
+         </details>
         
         <h2 style="margin-top:30px;">📋 Pedidos</h2>
         <button onclick="loadOrders()" class="btn-green">🔄 Recargar</button>
         <button onclick="clearOrders()" class="btn-red">Limpiar Todo</button>
         <div id="orders-list"></div>
+
+        <h2 style="margin-top:30px;">📧 Mensajes de Contacto</h2>
+        <button onclick="loadMessages()" class="btn-green">🔄 Recargar</button>
+        <div id="messages-list"></div>
     </div>
     
     <script>
-        const PASS = 'juan123';
+        const PASS = 'juan1962';
         const DEFAULT_PRODUCTS = [
-            {id:2,name:'Pimiento italiano',price:3,cat:'verduras',img:'img/pimiento italiano.jpg'},
-            {id:3,name:'Cebollino',price:2,cat:'verduras',img:'img/cebollino.jpg'},
-            {id:4,name:'Berenjena morada',price:2,cat:'verduras',img:'img/berejena morada.jpg'},
-            {id:5,name:'Calabazin',price:2,cat:'verduras',img:'img/calabazin negro.jpg'},
-            {id:6,name:'Cebolla',price:2,cat:'verduras',img:'img/cebolla.jpg'},
-            {id:13,name:'Lechuga',price:1.5,cat:'verduras',img:'img/lechuga.jpg'},
-            {id:18,name:'Fresa',price:5,cat:'frutas',img:'img/fresa.jpg'},
-            {id:19,name:'Pera',price:2.8,cat:'frutas',img:'img/pera.jpg'}
-        ];
+             {id:1,nombre:'Tomate',precio:3,imagen:'img/tomate.jpg',categoria:'verduras'},
+             {id:2,nombre:'Pimiento italiano',precio:3,imagen:'img/pimiento.jpg',categoria:'verduras'},
+             {id:3,nombre:'Cebollino',precio:2,imagen:'img/cebollino.jpg',categoria:'verduras'},
+             {id:4,nombre:'Berejena morada',precio:2,imagen:'img/berejena.jpg',categoria:'verduras'},
+             {id:5,nombre:'Calabazin',precio:2,imagen:'img/calabazin.jpg',categoria:'verduras'},
+             {id:6,nombre:'Cebolla',precio:2,imagen:'img/cebolla.jpg',categoria:'verduras'},
+             {id:13,nombre:'Lechuga',precio:1.5,imagen:'img/lechuga.jpg',categoria:'verduras'},
+             {id:18,nombre:'Fresa',precio:5,imagen:'img/fresa.jpg',categoria:'frutas'},
+             {id:19,nombre:'Pera',precio:2.8,imagen:'img/pera.jpg',categoria:'frutas'}
+         ];
 
         function getProds() { return JSON.parse(localStorage.getItem('productos')) || DEFAULT_PRODUCTS; }
         function saveProds(p) { localStorage.setItem('productos', JSON.stringify(p)); }
@@ -85,25 +93,74 @@
             location.reload();
         }
         
+        let editIndex = -1;
+
         function renderProds() {
-            let p = getProds();
-            document.getElementById('products-list').innerHTML = p.map((pr,i) =>
-                '<div class="product-card"><b>'+pr.name+'</b><br>'+pr.price+'€<br><small>'+pr.cat+'</small><br><button onclick="delProd('+i+')" class="btn-red">🗑</button></div>'
-            ).join('');
-        }
+             let p = getProds();
+             document.getElementById('products-list').innerHTML = p.map((pr,i) =>
+                 '<div class="product-card"><img src="'+pr.imagen+'" style="width:100%;height:120px;object-fit:cover;border-radius:4px;" onerror="this.style.display=\'none\'"><b>'+pr.nombre+'</b><br>'+pr.precio+'€<br><span style="background:#e0e0e0;padding:2px 6px;border-radius:3px;font-size:12px;">'+pr.categoria+'</span><br><button onclick="editProd('+i+')" style="background:#2d5a3d;color:white;border:none;padding:4px 8px;margin:2px;cursor:pointer;">✏️</button><button onclick="delProd('+i+')" class="btn-red">🗑</button></div>'
+             ).join('');
+         }
+
+        function editProd(i) {
+             let p = getProds();
+             let prod = p[i];
+             document.getElementById('prod-name').value = prod.nombre;
+             document.getElementById('prod-price').value = prod.precio;
+             document.getElementById('prod-cat').value = prod.categoria;
+             document.getElementById('prod-img').value = prod.imagen;
+             editIndex = i;
+             document.getElementById('btn-cancel').style.display = 'inline-block';
+             document.querySelector('#main-area details summary').textContent = '✏️ Editar Producto (ID: '+prod.id+')';
+             updateImgPreview();
+         }
+
+        function cancelEdit() {
+             editIndex = -1;
+             document.getElementById('prod-name').value = '';
+             document.getElementById('prod-price').value = '';
+             document.getElementById('prod-img').value = '';
+             document.getElementById('btn-cancel').style.display = 'none';
+             document.getElementById('img-preview').innerHTML = '';
+             document.querySelector('#main-area details summary').textContent = '➕ Añadir Producto';
+         }
         
+        function updateImgPreview() {
+             let nombre = document.getElementById('prod-name').value;
+             let src = document.getElementById('prod-img').value || (nombre ? 'img/'+nombre.toLowerCase().replace(/ /g,'_')+'.jpg' : '');
+             if(src) {
+                 document.getElementById('img-preview').innerHTML = '<img src="'+src+'" style="max-width:100px;max-height:60px;object-fit:cover;border-radius:4px;" onerror="this.parentNode.innerHTML=\'<small style=color:red>❌ Imagen no encontrada: '+src+'</small>\'"><br><small>'+src+'</small>';
+             } else {
+                 document.getElementById('img-preview').innerHTML = '<small style="color:#999;">Escribe un nombre para previsualizar</small>';
+             }
+         }
+
         function addProduct() {
-            let n = document.getElementById('prod-name').value;
-            let pr = parseFloat(document.getElementById('prod-price').value);
-            if(!n || !pr) return alert('Escribe nombre y precio');
-            let p = getProds();
-            p.push({id:Date.now(), name:n, price:pr, cat:document.getElementById('prod-cat').value, img:document.getElementById('prod-img').value || 'img/'+n.toLowerCase().replace(/ /g,'')+'.jpg'});
-            saveProds(p);
-            alert('✅ Guardado');
-            document.getElementById('prod-name').value = '';
-            document.getElementById('prod-price').value = '';
-            renderProds();
-        }
+             let n = document.getElementById('prod-name').value;
+             let pr = parseFloat(document.getElementById('prod-price').value);
+             if(!n || !pr) return alert('Escribe nombre y precio');
+             let p = getProds();
+             if(editIndex >= 0) {
+                 p[editIndex].nombre = n;
+                 p[editIndex].precio = pr;
+                 p[editIndex].categoria = document.getElementById('prod-cat').value;
+                 p[editIndex].imagen = document.getElementById('prod-img').value || 'img/'+n.toLowerCase().replace(/ /g,'_')+'.jpg';
+                 editIndex = -1;
+                 alert('✅ Actualizado');
+                 document.querySelector('#main-area details summary').textContent = '➕ Añadir Producto';
+             } else {
+                 p.push({id:Date.now(), nombre:n, precio:pr, categoria:document.getElementById('prod-cat').value, imagen:document.getElementById('prod-img').value || 'img/'+n.toLowerCase().replace(/ /g,'_')+'.jpg'});
+                 alert('✅ Guardado');
+             }
+             saveProds(p);
+             document.getElementById('prod-name').value = '';
+             document.getElementById('prod-price').value = '';
+             document.getElementById('prod-img').value = '';
+             document.getElementById('btn-cancel').style.display = 'none';
+             document.getElementById('img-preview').innerHTML = '';
+             document.querySelector('#main-area details summary').textContent = '➕ Añadir Producto';
+             renderProds();
+         }
         
         function delProd(i) {
             if(!confirm('Borrar?')) return;
@@ -114,13 +171,21 @@
         }
         
         function loadOrders() {
-            let o = JSON.parse(localStorage.getItem('my_orders') || '[]');
-            let d = document.getElementById('orders-list');
-            if(o.length === 0) { d.innerHTML = '<p>No hay pedidos</p>'; return; }
-            d.innerHTML = o.map((or,j) =>
-                '<div class="order-card"><b>'+or.name+'</b> - '+or.phone+'<br>📧 '+(or.email||'-')+'<br>📍 '+or.address+'<br>📅 '+new Date(or.date||Date.now()).toLocaleString()+'<hr>'+(or.items||[]).map(it=>'<div>'+it+'</div>').join('')+'<div><b>Total: '+Number(or.total||0).toFixed(2)+'€</b></div><button onclick="delOrder('+j+')" class="btn-red">🗑</button></div>'
-            ).join('');
-        }
+             fetch('/api/pedidos').then(r => r.json()).then(o => {
+                 let d = document.getElementById('orders-list');
+                 if(o.length === 0) { d.innerHTML = '<p>No hay pedidos</p>'; return; }
+                 d.innerHTML = o.map((or,j) =>
+                     '<div class="order-card"><b>'+or.name+'</b> - '+or.phone+'<br>📧 '+(or.email||'-')+'<br>📍 '+or.address+'<br>📅 '+new Date(or.fecha||or.date||Date.now()).toLocaleString()+'<hr>'+(or.items||[]).map(it=>'<div>'+it+'</div>').join('')+'<div><b>Total: '+Number(or.total||0).toFixed(2)+'€</b></div><span style="background:#ffeeba;padding:2px 6px;border-radius:3px;font-size:12px;">'+or.estado+'</span> <button onclick="delOrder('+j+')" class="btn-red">🗑</button></div>'
+                 ).join('');
+             }).catch(() => {
+                 let o = JSON.parse(localStorage.getItem('my_orders') || '[]');
+                 let d = document.getElementById('orders-list');
+                 if(o.length === 0) { d.innerHTML = '<p>No hay pedidos</p>'; return; }
+                 d.innerHTML = o.map((or,j) =>
+                     '<div class="order-card"><b>'+or.name+'</b> - '+or.phone+'<br>📧 '+(or.email||'-')+'<br>📍 '+or.address+'<br>📅 '+new Date(or.date||Date.now()).toLocaleString()+'<hr>'+(or.items||[]).map(it=>'<div>'+it+'</div>').join('')+'<div><b>Total: '+Number(or.total||0).toFixed(2)+'€</b></div><button onclick="delOrder('+j+')" class="btn-red">🗑</button></div>'
+                 ).join('');
+             });
+         }
         
         function delOrder(j) {
             if(!confirm('Borrar pedido?')) return;
@@ -131,10 +196,24 @@
         }
         
         function clearOrders() {
-            if(!confirm('Borrar TODOS los pedidos?')) return;
-            localStorage.removeItem('my_orders');
-            loadOrders();
-        }
+             if(!confirm('Borrar TODOS los pedidos?')) return;
+             fetch('/api/pedidos', { method: 'DELETE' }).catch(() => {
+                 localStorage.removeItem('my_orders');
+             });
+             loadOrders();
+         }
+
+        function loadMessages() {
+             fetch('/api/mensajes').then(r => r.json()).then(m => {
+                 let d = document.getElementById('messages-list');
+                 if(m.length === 0) { d.innerHTML = '<p>No hay mensajes</p>'; return; }
+                 d.innerHTML = m.map((msg,j) =>
+                     '<div class="order-card"><b>'+msg.nombre+'</b> - '+msg.email+'<br>📅 '+new Date(msg.fecha||Date.now()).toLocaleString()+'<hr><p>'+msg.mensaje+'</p></div>'
+                 ).join('');
+             }).catch(() => {
+                 d.innerHTML = '<p>Error al cargar mensajes del servidor</p>';
+             });
+         }
         
         // Check session
         if(sessionStorage.getItem('admin_logged') === 'yes') {

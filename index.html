@@ -11,6 +11,27 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
+    <script>
+        function enviarMensaje(e) {
+            e.preventDefault();
+            const form = e.target;
+            const mensaje = {
+                nombre: form.nombre.value,
+                email: form.email.value,
+                mensaje: form.mensaje.value
+            };
+            fetch('/api/mensajes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(mensaje)
+            }).then(() => {
+                alert('✅ Mensaje enviado');
+                form.reset();
+            }).catch(() => {
+                alert('❌ Error al enviar mensaje');
+            });
+        }
+    </script>
 </head>
 
 <body>
@@ -46,7 +67,7 @@
                         <p>Del huerto a tu mesa</p>
                     </div>
                 </div>
-                <div class="slide" style="background-image: url('img/tomate rosa.jpg'); background-size: cover; background-position: center;">
+                <div class="slide" style="background-image: url('img/tomate.jpg'); background-size: cover; background-position: center;">
                     <div class="slide-caption">
                         <h3>Tomates Frescos</h3>
                         <p>Cultivados con amor</p>
@@ -58,7 +79,7 @@
                         <p>Frescas cada día</p>
                     </div>
                 </div>
-                <div class="slide" style="background-image: url('img/pimiento italiano.jpg'); background-size: cover; background-position: center;">
+                <div class="slide" style="background-image: url('img/pimiento.jpg'); background-size: cover; background-position: center;">
                     <div class="slide-caption">
                         <h3>Pimientos Italianos</h3>
                         <p>Sabor auténtico</p>
@@ -131,7 +152,7 @@
                         </div>
                     </div>
 
-                    <form class="contacto-form" id="contacto-form" action="https://formspree.io/f/mwvazjng" method="POST">
+                    <form class="contacto-form" id="contacto-form" onsubmit="enviarMensaje(event)">
                         <div class="form-group">
                             <label for="nombre">Nombre</label>
                             <input type="text" id="nombre" name="nombre" class="form-input" required>
