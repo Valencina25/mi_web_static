@@ -1,0 +1,33 @@
+{
+  "name": "mi-web-static",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Valencina25/mi_web_static.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^8.11.0"
+  },
+  "bugs": {
+    "url": "https://github.com/Valencina25/mi_web_static/issues"
+  },
+  "homepage": "https://github.com/Valencina25/mi_web_static#readme",
+  "devDependencies": {
+    "vite": "^8.0.10"
+  }
+}
