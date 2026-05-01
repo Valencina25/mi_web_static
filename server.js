@@ -19,8 +19,8 @@ const mimeTypes = {
 
 // Configuración PostgreSQL
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+    connectionString: process.env.DATABASE_URL ? process.env.DATABASE_URL + (process.env.DATABASE_URL.includes('?') ? '&sslmode=verify-full' : '?sslmode=verify-full') : null,
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: true } : false
 });
 
 // Crear tablas si no existen
