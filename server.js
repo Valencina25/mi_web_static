@@ -1,7 +1,12 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { Pool } = require('pg');
+let Pool;
+try {
+    Pool = require('pg').Pool;
+} catch(e) {
+    console.log('pg module not found, using file storage');
+}
 
 const PORT = process.env.PORT || 3000;
 const mimeTypes = {

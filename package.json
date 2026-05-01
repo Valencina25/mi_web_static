@@ -21,7 +21,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "pg": "^8.11.0"
+    "pg": "^8.11.3"
   },
   "bugs": {
     "url": "https://github.com/Valencina25/mi_web_static/issues"
