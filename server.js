@@ -1,14 +1,9 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { Pool } = require('pg');
 
 const PORT = process.env.PORT || 3000;
-const PEDIDOS_FILE = 'pedidos.json';
-const MENSAJES_FILE = 'mensajes.json';
-
-if (!fs.existsSync(PEDIDOS_FILE)) fs.writeFileSync(PEDIDOS_FILE, '[]');
-if (!fs.existsSync(MENSAJES_FILE)) fs.writeFileSync(MENSAJES_FILE, '[]');
-
 const mimeTypes = {
     '.html': 'text/html',
     '.js': 'application/javascript',
@@ -17,26 +12,74 @@ const mimeTypes = {
     '.png': 'image/png'
 };
 
-const server = http.createServer((req, res) => {
+// Configuración PostgreSQL
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+});
+
+// Crear tablas si no existen
+async function initDB() {
+    if (!process.env.DATABASE_URL) {
+        console.log('No DATABASE_URL, usando archivos locales');
+        if (!fs.existsSync('pedidos.json')) fs.writeFileSync('pedidos.json', '[]');
+        if (!fs.existsSync('mensajes.json')) fs.writeFileSync('mensajes.json', '[]');
+        return;
+    }
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS pedidos (
+                id SERIAL PRIMARY KEY,
+                data JSONB,
+                fecha TIMESTAMP DEFAULT NOW()
+            );
+            CREATE TABLE IF NOT EXISTS mensajes (
+                id SERIAL PRIMARY KEY,
+                data JSONB,
+                fecha TIMESTAMP DEFAULT NOW()
+            );
+        `);
+        console.log('Base de datos inicializada');
+    } catch(e) {
+        console.error('Error DB:', e.message);
+    }
+}
+
+initDB();
+
+const server = http.createServer(async (req, res) => {
     // API Pedidos
     if (req.url === '/api/pedidos' && req.method === 'GET') {
         try {
-            const data = fs.readFileSync(PEDIDOS_FILE, 'utf8');
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(data);
-        } catch(e) { res.end('[]'); }
+            if (process.env.DATABASE_URL) {
+                const result = await pool.query('SELECT data FROM pedidos ORDER BY fecha DESC');
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(result.rows.map(r => r.data)));
+            } else {
+                const data = fs.readFileSync('pedidos.json', 'utf8');
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(data);
+            }
+        } catch(e) {
+            res.end('[]');
+        }
         return;
     }
-    
+
     if (req.url === '/api/pedidos' && req.method === 'POST') {
         let body = '';
         req.on('data', chunk => body += chunk);
-        req.on('end', () => {
+        req.on('end', async () => {
             try {
                 const data = JSON.parse(body);
-                const pedidos = JSON.parse(fs.readFileSync(PEDIDOS_FILE, 'utf8'));
-                pedidos.unshift({ id: Date.now(), ...data, fecha: new Date().toISOString(), estado: 'pendiente' });
-                fs.writeFileSync(PEDIDOS_FILE, JSON.stringify(pedidos, null, 2));
+                const pedido = { ...data, fecha: new Date().toISOString(), estado: 'pendiente' };
+                if (process.env.DATABASE_URL) {
+                    await pool.query('INSERT INTO pedidos(data) VALUES($1)', [JSON.stringify(pedido)]);
+                } else {
+                    const pedidos = JSON.parse(fs.readFileSync('pedidos.json', 'utf8'));
+                    pedidos.unshift(pedido);
+                    fs.writeFileSync('pedidos.json', JSON.stringify(pedidos, null, 2));
+                }
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ success: true }));
             } catch(e) {
@@ -46,33 +89,54 @@ const server = http.createServer((req, res) => {
         });
         return;
     }
-    
+
     if (req.url === '/api/pedidos' && req.method === 'DELETE') {
-        fs.writeFileSync(PEDIDOS_FILE, '[]');
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true }));
+        try {
+            if (process.env.DATABASE_URL) {
+                await pool.query('DELETE FROM pedidos');
+            } else {
+                fs.writeFileSync('pedidos.json', '[]');
+            }
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true }));
+        } catch(e) {
+            res.end(JSON.stringify({ error: 'Error' }));
+        }
         return;
     }
-    
+
     // API Mensajes
     if (req.url === '/api/mensajes' && req.method === 'GET') {
         try {
-            const data = fs.readFileSync(MENSAJES_FILE, 'utf8');
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(data);
-        } catch(e) { res.end('[]'); }
+            if (process.env.DATABASE_URL) {
+                const result = await pool.query('SELECT data FROM mensajes ORDER BY fecha DESC');
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(result.rows.map(r => r.data)));
+            } else {
+                const data = fs.readFileSync('mensajes.json', 'utf8');
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(data);
+            }
+        } catch(e) {
+            res.end('[]');
+        }
         return;
     }
-    
+
     if (req.url === '/api/mensajes' && req.method === 'POST') {
         let body = '';
         req.on('data', chunk => body += chunk);
-        req.on('end', () => {
+        req.on('end', async () => {
             try {
                 const data = JSON.parse(body);
-                const mensajes = JSON.parse(fs.readFileSync(MENSAJES_FILE, 'utf8'));
-                mensajes.unshift({ id: Date.now(), ...data, fecha: new Date().toISOString() });
-                fs.writeFileSync(MENSAJES_FILE, JSON.stringify(mensajes, null, 2));
+                const mensaje = { ...data, fecha: new Date().toISOString() };
+                if (process.env.DATABASE_URL) {
+                    await pool.query('INSERT INTO mensajes(data) VALUES($1)', [JSON.stringify(mensaje)]);
+                } else {
+                    const mensajes = JSON.parse(fs.readFileSync('mensajes.json', 'utf8'));
+                    mensajes.unshift(mensaje);
+                    fs.writeFileSync('mensajes.json', JSON.stringify(mensajes, null, 2));
+                }
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ success: true }));
             } catch(e) {
@@ -82,20 +146,28 @@ const server = http.createServer((req, res) => {
         });
         return;
     }
-    
+
     if (req.url === '/api/mensajes' && req.method === 'DELETE') {
-        fs.writeFileSync(MENSAJES_FILE, '[]');
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true }));
+        try {
+            if (process.env.DATABASE_URL) {
+                await pool.query('DELETE FROM mensajes');
+            } else {
+                fs.writeFileSync('mensajes.json', '[]');
+            }
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true }));
+        } catch(e) {
+            res.end(JSON.stringify({ error: 'Error' }));
+        }
         return;
     }
-    
+
     // Archivos estáticos
     let filePath = req.url === '/' ? '/index.html' : req.url;
     filePath = path.join(__dirname, filePath);
     const ext = path.extname(filePath);
     const contentType = mimeTypes[ext] || 'text/plain';
-    
+
     fs.readFile(filePath, (err, content) => {
         if (err) {
             res.writeHead(404);
