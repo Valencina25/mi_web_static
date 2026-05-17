@@ -12,7 +12,12 @@ export default defineConfig({
         admin: resolve(__dirname, 'admin.html'),
         login: resolve(__dirname, 'login.html'),
         checkout: resolve(__dirname, 'checkout.html'),
-        carrito: resolve(__dirname, 'carrito.html')
+        carrito: resolve(__dirname, 'carrito.html'),
+        script: resolve(__dirname, 'script.js')
+      },
+      output: {
+        manualChunks: undefined,
+        entryFileNames: 'assets/[name].js'
       }
     }
   },

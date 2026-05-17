@@ -1,3 +1,4 @@
+// ES module
 const productosDefault = [
     { id: 1, nombre: 'tomate', precio: 3, imagen: 'img/tomate.jpg', categoria: 'verduras' },
     { id: 2, nombre: 'pimiento italiano', precio: 3, imagen: 'img/pimiento.jpg', categoria: 'verduras' },
