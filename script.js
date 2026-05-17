@@ -11,15 +11,23 @@ const productosDefault = [
 ];
 
 function getProductos() {
-    const productos = JSON.parse(localStorage.getItem('productos'));
-    if (productos && productos.length > 0) {
-        return productos.map(p => ({
-            ...p,
-            imagen: p.imagen || `img/${p.nombre.toLowerCase().replace(/ /g, '_')}.jpg`
-        }));
+    let productos = JSON.parse(localStorage.getItem('productos'));
+    if (!productos || productos.length === 0) {
+        localStorage.setItem('productos', JSON.stringify(productosDefault));
+        return productosDefault;
     }
-    localStorage.setItem('productos', JSON.stringify(productosDefault));
-    return productosDefault;
+    productos = productos.map(p => {
+        let imagen = p.imagen || '';
+        if (imagen.startsWith('assets/')) {
+            imagen = 'img/' + imagen.replace('assets/images/', '').replace('assets/', '');
+        }
+        if (!imagen && p.nombre) {
+            imagen = 'img/' + p.nombre.toLowerCase().replace(/ /g, '_') + '.jpg';
+        }
+        return { ...p, imagen };
+    });
+    localStorage.setItem('productos', JSON.stringify(productos));
+    return productos;
 }
 
 function getCarrito() {
