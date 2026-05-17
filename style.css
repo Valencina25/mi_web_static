@@ -321,6 +321,8 @@ ul, ol {
   margin: 20px 0;
   border-radius: 10px;
   width: 100%;
+  border: 2px solid red;
+  min-height: 450px;
 }
 
 .slide {
