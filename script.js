@@ -11,23 +11,17 @@ const productosDefault = [
 ];
 
 function getProductos() {
-    let productos = JSON.parse(localStorage.getItem('productos'));
-    if (!productos || productos.length === 0) {
-        localStorage.setItem('productos', JSON.stringify(productosDefault));
-        return productosDefault;
+    const ps = document.querySelectorAll('#productos-container .producto');
+    if (ps.length > 0) {
+        return Array.from(ps).map((p, i) => ({
+            id: i + 1,
+            nombre: p.querySelector('h3').textContent,
+            precio: parseFloat(p.querySelector('.producto-precio')?.textContent?.replace('€','') || p.querySelectorAll('p')[1].textContent.replace('€','')),
+            imagen: p.querySelector('img').src,
+            categoria: p.querySelectorAll('p')[0].textContent
+        }));
     }
-    productos = productos.map(p => {
-        let imagen = p.imagen || '';
-        if (imagen.startsWith('assets/')) {
-            imagen = 'img/' + imagen.replace('assets/images/', '').replace('assets/', '');
-        }
-        if (!imagen && p.nombre) {
-            imagen = 'img/' + p.nombre.toLowerCase().replace(/ /g, '_') + '.jpg';
-        }
-        return { ...p, imagen };
-    });
-    localStorage.setItem('productos', JSON.stringify(productos));
-    return productos;
+    return [];
 }
 
 function getCarrito() {
@@ -84,7 +78,7 @@ window.filtrar = function(cat, event) {
 
 function render() {
     const container = document.getElementById('productos-container');
-    if (container) {
+    if (container && container.children.length === 0) {
         const ps = getProductos();
         const filtrados = filtroActual === 'todos' ? ps : ps.filter(p => p.categoria === filtroActual);
         container.innerHTML = filtrados.map(p => `
