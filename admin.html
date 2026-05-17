@@ -73,7 +73,20 @@
              {id:19,nombre:'Pera',precio:2.8,imagen:'img/pera.jpg',categoria:'frutas'}
          ];
 
-        function getProds() { return JSON.parse(localStorage.getItem('productos')) || DEFAULT_PRODUCTS; }
+        function getProds() {
+            let p = JSON.parse(localStorage.getItem('productos')) || DEFAULT_PRODUCTS;
+            p = p.map(prod => {
+                if (prod.imagen && prod.imagen.startsWith('assets/')) {
+                    prod.imagen = 'img/' + prod.imagen.replace('assets/images/', '').replace('assets/', '');
+                }
+                if (!prod.imagen && prod.nombre) {
+                    prod.imagen = 'img/' + prod.nombre.toLowerCase().replace(/ /g, '_') + '.jpg';
+                }
+                return prod;
+            });
+            localStorage.setItem('productos', JSON.stringify(p));
+            return p;
+        }
         function saveProds(p) { localStorage.setItem('productos', JSON.stringify(p)); }
         
         function login() {
@@ -127,7 +140,11 @@
         
         function updateImgPreview() {
              let nombre = document.getElementById('prod-name').value;
-             let src = document.getElementById('prod-img').value || (nombre ? 'img/'+nombre.toLowerCase().replace(/ /g,'_')+'.jpg' : '');
+             let existingImg = document.getElementById('prod-img').value;
+             let src = existingImg || (nombre ? 'img/'+nombre.toLowerCase().replace(/ /g,'_')+'.jpg' : '');
+             if(src.startsWith('assets/')) {
+                 src = 'img/' + src.replace('assets/images/', '').replace('assets/', '');
+             }
              if(src) {
                  document.getElementById('img-preview').innerHTML = '<img src="'+src+'" style="max-width:100px;max-height:60px;object-fit:cover;border-radius:4px;" onerror="this.parentNode.innerHTML=\'<small style=color:red>❌ Imagen no encontrada: '+src+'</small>\'"><br><small>'+src+'</small>';
              } else {
