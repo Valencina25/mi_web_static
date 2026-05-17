@@ -505,6 +505,8 @@ ul, ol {
   object-fit: cover;
   transition: transform 0.3s ease;
   display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .producto:hover .producto-img {
