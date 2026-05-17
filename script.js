@@ -11,12 +11,15 @@ const productosDefault = [
 ];
 
 function getProductos() {
-    let productos = JSON.parse(localStorage.getItem('productos'));
-    if (!productos || productos.length === 0) {
-        localStorage.setItem('productos', JSON.stringify(productosDefault));
-        return productosDefault;
+    const productos = JSON.parse(localStorage.getItem('productos'));
+    if (productos && productos.length > 0) {
+        return productos.map(p => ({
+            ...p,
+            imagen: p.imagen || `img/${p.nombre.toLowerCase().replace(/ /g, '_')}.jpg`
+        }));
     }
-    return productos;
+    localStorage.setItem('productos', JSON.stringify(productosDefault));
+    return productosDefault;
 }
 
 function getCarrito() {
