@@ -2,8 +2,14 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 let Pool;
+let pool = null;
+
 try {
     Pool = require('pg').Pool;
+    pool = new Pool({
+        connectionString: process.env.DATABASE_URL ? process.env.DATABASE_URL + (process.env.DATABASE_URL.includes('?') ? '&sslmode=verify-full' : '?sslmode=verify-full') : null,
+        ssl: process.env.DATABASE_URL ? { rejectUnauthorized: true } : false
+    });
 } catch(e) {
     console.log('pg module not found, using file storage');
 }
@@ -17,16 +23,10 @@ const mimeTypes = {
     '.png': 'image/png'
 };
 
-// Configuración PostgreSQL
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL ? process.env.DATABASE_URL + (process.env.DATABASE_URL.includes('?') ? '&sslmode=verify-full' : '?sslmode=verify-full') : null,
-    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: true } : false
-});
-
 // Crear tablas si no existen
 async function initDB() {
-    if (!process.env.DATABASE_URL) {
-        console.log('No DATABASE_URL, usando archivos locales');
+    if (!pool) {
+        console.log('No pool available, usando archivos locales');
         if (!fs.existsSync('pedidos.json')) fs.writeFileSync('pedidos.json', '[]');
         if (!fs.existsSync('mensajes.json')) fs.writeFileSync('mensajes.json', '[]');
         return;

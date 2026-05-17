@@ -1,7 +1,7 @@
 {
-  "name": "mi-web-static",
+  "name": "tienda-huerto-juan",
   "version": "1.0.0",
-  "description": "",
+  "description": "Tienda online dinámica del Huerto de Juan (Node.js + PostgreSQL)",
   "main": "server.js",
   "engines": {
     "node": ">=18"

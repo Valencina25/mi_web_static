@@ -12,27 +12,10 @@ const productosDefault = [
 
 function getProductos() {
     let productos = JSON.parse(localStorage.getItem('productos'));
-    if (!productos) {
+    if (!productos || productos.length === 0) {
         localStorage.setItem('productos', JSON.stringify(productosDefault));
         return productosDefault;
     }
-    productos = productos.map(p => {
-        if (p.imagen) {
-            p.imagen = p.imagen.replace(/ /g, '_');
-        }
-        if (p.nombre && !p.name) {
-            p.nombre = p.nombre;
-        }
-        if (p.name && !p.nombre) {
-            p.nombre = p.name;
-            p.precio = p.price || p.precio;
-            p.imagen = p.img || p.imagen;
-            p.categoria = p.cat || p.categoria;
-            delete p.name; delete p.price; delete p.img; delete p.cat;
-        }
-        return p;
-    });
-    localStorage.setItem('productos', JSON.stringify(productos));
     return productos;
 }
 
@@ -126,3 +109,57 @@ function render() {
 }
 
 document.addEventListener('DOMContentLoaded', render);
+
+const sliderWrapper = document.getElementById('slider-wrapper');
+if (sliderWrapper) {
+    let currentSlide = 0;
+    const slides = sliderWrapper.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('slider-progress');
+    const dots = document.querySelectorAll('.dot');
+
+    function goToSlide(index) {
+        currentSlide = ((index % totalSlides) + totalSlides) % totalSlides;
+        sliderWrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+        
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentSlide);
+            dot.setAttribute('aria-selected', i === currentSlide);
+        });
+        
+        if (progressBar) {
+            progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+        }
+    }
+
+    document.querySelector('.slider-btn.prev')?.addEventListener('click', () => {
+        goToSlide(currentSlide - 1);
+        resetAutoSlide();
+    });
+
+    document.querySelector('.slider-btn.next')?.addEventListener('click', () => {
+        goToSlide(currentSlide + 1);
+        resetAutoSlide();
+    });
+
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            goToSlide(index);
+            resetAutoSlide();
+        });
+    });
+
+    let autoSlideInterval;
+    function startAutoSlide() {
+        autoSlideInterval = setInterval(() => {
+            goToSlide(currentSlide + 1);
+        }, 5000);
+    }
+
+    function resetAutoSlide() {
+        clearInterval(autoSlideInterval);
+        startAutoSlide();
+    }
+
+    startAutoSlide();
+}

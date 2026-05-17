@@ -325,6 +325,8 @@ ul, ol {
 
 .slide {
   min-width: 100%;
+  width: 100%;
+  flex-shrink: 0;
   height: 100%;
   position: relative;
   background-size: cover;
