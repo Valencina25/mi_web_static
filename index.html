@@ -62,35 +62,35 @@
     <div class="slider" role="region" aria-label="Carrusel de imágenes">
         <div class="slider-wrapper" id="slider-wrapper">
                 <div class="slide">
-                    <img src="img/juan.jpg" alt="Productos ecológicos" style="width:100%;height:450px;object-fit:cover;background:#333;">
+                    <img src="img/juan.jpg" alt="Productos ecológicos" style="width:100%;height:450px;object-fit:cover;">
                     <div class="slide-caption">
                         <h3>Productos 100% Ecológicos</h3>
                         <p>Del huerto a tu mesa</p>
                     </div>
                 </div>
                 <div class="slide">
-                    <img src="img/tomate.jpg" alt="Tomates frescos" style="width:100%;height:450px;object-fit:cover;background:#333;">
+                    <img src="img/tomate.jpg" alt="Tomates frescos" style="width:100%;height:450px;object-fit:cover;">
                     <div class="slide-caption">
                         <h3>Tomates Frescos</h3>
                         <p>Cultivados con amor</p>
                     </div>
                 </div>
                 <div class="slide">
-                    <img src="img/lechuga.jpg" alt="Lechugas" style="width:100%;height:450px;object-fit:cover;background:#333;">
+                    <img src="img/lechuga.jpg" alt="Lechugas" style="width:100%;height:450px;object-fit:cover;">
                     <div class="slide-caption">
                         <h3>Lechugas Crujientes</h3>
                         <p>Frescas cada día</p>
                     </div>
                 </div>
                 <div class="slide">
-                    <img src="img/pimiento.jpg" alt="Pimientos" style="width:100%;height:450px;object-fit:cover;background:#333;">
+                    <img src="img/pimiento.jpg" alt="Pimientos" style="width:100%;height:450px;object-fit:cover;">
                     <div class="slide-caption">
                         <h3>Pimientos Italianos</h3>
                         <p>Sabor auténtico</p>
                     </div>
                 </div>
                 <div class="slide">
-                    <img src="img/cebollino.jpg" alt="Cebollino" style="width:100%;height:450px;object-fit:cover;background:#333;">
+                    <img src="img/cebollino.jpg" alt="Cebollino" style="width:100%;height:450px;object-fit:cover;">
                     <div class="slide-caption">
                         <h3>Hierbas Frescas</h3>
                         <p>Para tus recetas</p>
@@ -133,6 +133,87 @@
                 </div>
 
                 <div class="productos-grid" id="productos-container" role="list">
+                    <article class="producto">
+                        <img src="img/tomate.jpg" alt="Tomate" class="producto-img">
+                        <div class="producto-content">
+                            <h3>Tomate</h3>
+                            <p>verduras</p>
+                            <p>3 €</p>
+                            <button class="btn btn-primary" onclick="addCarritoById(1)">Añadir</button>
+                        </div>
+                    </article>
+                    <article class="producto">
+                        <img src="img/pimiento.jpg" alt="Pimiento italiano" class="producto-img">
+                        <div class="producto-content">
+                            <h3>Pimiento italiano</h3>
+                            <p>verduras</p>
+                            <p>3 €</p>
+                            <button class="btn btn-primary" onclick="addCarritoById(2)">Añadir</button>
+                        </div>
+                    </article>
+                    <article class="producto">
+                        <img src="img/cebollino.jpg" alt="Cebollino" class="producto-img">
+                        <div class="producto-content">
+                            <h3>Cebollino</h3>
+                            <p>verduras</p>
+                            <p>2 €</p>
+                            <button class="btn btn-primary" onclick="addCarritoById(3)">Añadir</button>
+                        </div>
+                    </article>
+                    <article class="producto">
+                        <img src="img/berejena.jpg" alt="Berenjena" class="producto-img">
+                        <div class="producto-content">
+                            <h3>Berenjena morada</h3>
+                            <p>verduras</p>
+                            <p>2 €</p>
+                            <button class="btn btn-primary" onclick="addCarritoById(4)">Añadir</button>
+                        </div>
+                    </article>
+                    <article class="producto">
+                        <img src="img/calabazin.jpg" alt="Calabacín" class="producto-img">
+                        <div class="producto-content">
+                            <h3>Calabacín</h3>
+                            <p>verduras</p>
+                            <p>2 €</p>
+                            <button class="btn btn-primary" onclick="addCarritoById(5)">Añadir</button>
+                        </div>
+                    </article>
+                    <article class="producto">
+                        <img src="img/cebolla.jpg" alt="Cebolla" class="producto-img">
+                        <div class="producto-content">
+                            <h3>Cebolla</h3>
+                            <p>verduras</p>
+                            <p>2 €</p>
+                            <button class="btn btn-primary" onclick="addCarritoById(6)">Añadir</button>
+                        </div>
+                    </article>
+                    <article class="producto">
+                        <img src="img/lechuga.jpg" alt="Lechuga" class="producto-img">
+                        <div class="producto-content">
+                            <h3>Lechuga</h3>
+                            <p>verduras</p>
+                            <p>1.5 €</p>
+                            <button class="btn btn-primary" onclick="addCarritoById(13)">Añadir</button>
+                        </div>
+                    </article>
+                    <article class="producto">
+                        <img src="img/fresa.jpg" alt="Fresa" class="producto-img">
+                        <div class="producto-content">
+                            <h3>Fresa</h3>
+                            <p>frutas</p>
+                            <p>5 €</p>
+                            <button class="btn btn-primary" onclick="addCarritoById(18)">Añadir</button>
+                        </div>
+                    </article>
+                    <article class="producto">
+                        <img src="img/pera.jpg" alt="Pera" class="producto-img">
+                        <div class="producto-content">
+                            <h3>Pera</h3>
+                            <p>frutas</p>
+                            <p>2.8 €</p>
+                            <button class="btn btn-primary" onclick="addCarritoById(19)">Añadir</button>
+                        </div>
+                    </article>
                 </div>
             </div>
         </section>
