@@ -729,6 +729,18 @@ ul, ol {
     height: 40px;
   }
 
+  .slider-wrapper {
+    height: 250px;
+  }
+
+  .slide {
+    height: 250px;
+  }
+
+  .slide img {
+    height: 250px !important;
+  }
+
   .contacto-grid {
     grid-template-columns: 1fr;
   }
