@@ -328,9 +328,10 @@ ul, ol {
   width: 100%;
   flex-shrink: 0;
   height: 450px;
-  position: relative;
-  background-size: cover;
-  background-position: center;
+  position: relative !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
   display: flex;
   align-items: flex-end;
 }
