@@ -1,7 +1,7 @@
 // ===================================================================
 //  script.js  ·  Lógica de la tienda (productos, carrito y slider)
 // ===================================================================
-import { getProductos } from './productos.js';
+import { getProductos } from './productos.js?v=2';
 
 const CART_KEY = 'carrito';
 
