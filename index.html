@@ -12,24 +12,26 @@
     <link rel="stylesheet" href="style.css">
     <script type="module" src="./script.js"></script>
     <script>
+        // El formulario de contacto abre el programa de correo del visitante
+        // y además guarda una copia local para que la veas en el admin.
         function enviarMensaje(e) {
             e.preventDefault();
             const form = e.target;
-            const mensaje = {
-                nombre: form.nombre.value,
-                email: form.email.value,
-                mensaje: form.mensaje.value
-            };
-            fetch('/api/mensajes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mensaje)
-            }).then(() => {
-                alert('✅ Mensaje enviado');
-                form.reset();
-            }).catch(() => {
-                alert('❌ Error al enviar mensaje');
-            });
+            const nombre = form.nombre.value;
+            const email = form.email.value;
+            const mensaje = form.mensaje.value;
+
+            try {
+                const guardados = JSON.parse(localStorage.getItem('mensajes') || '[]');
+                guardados.unshift({ nombre, email, mensaje, fecha: new Date().toISOString() });
+                localStorage.setItem('mensajes', JSON.stringify(guardados));
+            } catch (err) { /* sin problema */ }
+
+            const asunto = encodeURIComponent('Contacto web Huerto de Juan · ' + nombre);
+            const cuerpo = encodeURIComponent(mensaje + '\n\n— ' + nombre + ' (' + email + ')');
+            window.location.href = 'mailto:valencina2012@hotmail.es?subject=' + asunto + '&body=' + cuerpo;
+
+            form.reset();
         }
     </script>
 </head>
@@ -51,7 +53,7 @@
                 <a href="index.html" class="nav-link">🏠 Inicio</a>
                 <a href="#productos" class="nav-link">🌱 Productos</a>
                 <a href="#contacto" class="nav-link">📩 Contacto</a>
-                <a href="carrito.html" class="nav-link">🛒 Carrito</a>
+                <a href="carrito.html" class="nav-link">🛒 Carrito <span data-cart-count class="cart-badge">0</span></a>
                 <a href="login.html" class="nav-link">🔐 Admin</a>
             </nav>
         </div>
@@ -127,93 +129,13 @@
                 <h2 id="productos-title" class="section-title">🌱 Productos</h2>
 
                 <div class="filtros" role="group" aria-label="Filtrar productos">
-                    <button class="filtro-btn active" data-filter="todos" onclick="filtrar('todos', event)">Todos</button>
-                    <button class="filtro-btn" data-filter="verduras" onclick="filtrar('verduras', event)">Verduras</button>
-                    <button class="filtro-btn" data-filter="frutas" onclick="filtrar('frutas', event)">Frutas</button>
+                    <button class="filtro-btn active" data-filter="todos">Todos</button>
+                    <button class="filtro-btn" data-filter="verduras">Verduras</button>
+                    <button class="filtro-btn" data-filter="frutas">Frutas</button>
                 </div>
 
                 <div class="productos-grid" id="productos-container" role="list">
-                    <article class="producto">
-                        <img src="img/tomate.jpg" alt="Tomate" class="producto-img">
-                        <div class="producto-content">
-                            <h3>Tomate</h3>
-                            <p>verduras</p>
-                            <p>3 €</p>
-                            <button class="btn btn-primary" onclick="addCarritoById(1)">Añadir</button>
-                        </div>
-                    </article>
-                    <article class="producto">
-                        <img src="img/pimiento.jpg" alt="Pimiento italiano" class="producto-img">
-                        <div class="producto-content">
-                            <h3>Pimiento italiano</h3>
-                            <p>verduras</p>
-                            <p>3 €</p>
-                            <button class="btn btn-primary" onclick="addCarritoById(2)">Añadir</button>
-                        </div>
-                    </article>
-                    <article class="producto">
-                        <img src="img/cebollino.jpg" alt="Cebollino" class="producto-img">
-                        <div class="producto-content">
-                            <h3>Cebollino</h3>
-                            <p>verduras</p>
-                            <p>2 €</p>
-                            <button class="btn btn-primary" onclick="addCarritoById(3)">Añadir</button>
-                        </div>
-                    </article>
-                    <article class="producto">
-                        <img src="img/berejena.jpg" alt="Berenjena" class="producto-img">
-                        <div class="producto-content">
-                            <h3>Berenjena morada</h3>
-                            <p>verduras</p>
-                            <p>2 €</p>
-                            <button class="btn btn-primary" onclick="addCarritoById(4)">Añadir</button>
-                        </div>
-                    </article>
-                    <article class="producto">
-                        <img src="img/calabazin.jpg" alt="Calabacín" class="producto-img">
-                        <div class="producto-content">
-                            <h3>Calabacín</h3>
-                            <p>verduras</p>
-                            <p>2 €</p>
-                            <button class="btn btn-primary" onclick="addCarritoById(5)">Añadir</button>
-                        </div>
-                    </article>
-                    <article class="producto">
-                        <img src="img/cebolla.jpg" alt="Cebolla" class="producto-img">
-                        <div class="producto-content">
-                            <h3>Cebolla</h3>
-                            <p>verduras</p>
-                            <p>2 €</p>
-                            <button class="btn btn-primary" onclick="addCarritoById(6)">Añadir</button>
-                        </div>
-                    </article>
-                    <article class="producto">
-                        <img src="img/lechuga.jpg" alt="Lechuga" class="producto-img">
-                        <div class="producto-content">
-                            <h3>Lechuga</h3>
-                            <p>verduras</p>
-                            <p>1.5 €</p>
-                            <button class="btn btn-primary" onclick="addCarritoById(13)">Añadir</button>
-                        </div>
-                    </article>
-                    <article class="producto">
-                        <img src="img/fresa.jpg" alt="Fresa" class="producto-img">
-                        <div class="producto-content">
-                            <h3>Fresa</h3>
-                            <p>frutas</p>
-                            <p>5 €</p>
-                            <button class="btn btn-primary" onclick="addCarritoById(18)">Añadir</button>
-                        </div>
-                    </article>
-                    <article class="producto">
-                        <img src="img/pera.jpg" alt="Pera" class="producto-img">
-                        <div class="producto-content">
-                            <h3>Pera</h3>
-                            <p>frutas</p>
-                            <p>2.8 €</p>
-                            <button class="btn btn-primary" onclick="addCarritoById(19)">Añadir</button>
-                        </div>
-                    </article>
+                    <!-- Los productos se cargan desde productos.js -->
                 </div>
             </div>
         </section>

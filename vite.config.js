@@ -1,8 +1,13 @@
 import { defineConfig } from 'vite';
 
+// Configuración para publicar en GitHub Pages.
+// La web funciona directamente desde la raíz del repositorio,
+// así que el build de Vite es totalmente opcional.
 export default defineConfig({
+  // Ruta base en GitHub Pages: https://valencina25.github.io/mi_web_static/
+  base: '/mi_web_static/',
   root: '.',
-  publicDir: 'public',
+  publicDir: false,
   build: {
     outDir: 'dist',
     assetsDir: 'assets',

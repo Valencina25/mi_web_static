@@ -807,3 +807,30 @@ ul, ol {
     transition-duration: 0.01ms !important;
   }
 }
+/* Contador del carrito en el menú */
+.cart-badge {
+    display: none;
+    min-width: 20px;
+    padding: 0 6px;
+    margin-left: 4px;
+    background: var(--color-accent, #bc6c25);
+    color: #fff;
+    border-radius: 999px;
+    font-size: .75rem;
+    line-height: 20px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Aviso flotante (toast) */
+.toast-msg {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--color-primary, #386641);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}

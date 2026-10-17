@@ -1,182 +1,267 @@
-// ES module
-const productosDefault = [
-    { id: 1, nombre: 'tomate', precio: 3, imagen: 'img/tomate.jpg', categoria: 'verduras' },
-    { id: 2, nombre: 'pimiento italiano', precio: 3, imagen: 'img/pimiento.jpg', categoria: 'verduras' },
-    { id: 3, nombre: 'cebollino', precio: 2, imagen: 'img/cebollino.jpg', categoria: 'verduras' },
-    { id: 4, nombre: 'berejena morada', precio: 2, imagen: 'img/berejena.jpg', categoria: 'verduras' },
-    { id: 5, nombre: 'calabazin', precio: 2, imagen: 'img/calabazin.jpg', categoria: 'verduras' },
-    { id: 6, nombre: 'cebolla', precio: 2, imagen: 'img/cebolla.jpg', categoria: 'verduras' },
-    { id: 13, nombre: 'lechuga', precio: 1.5, imagen: 'img/lechuga.jpg', categoria: 'verduras' },
-    { id: 18, nombre: 'fresa', precio: 5, imagen: 'img/fresa.jpg', categoria: 'frutas' },
-    { id: 19, nombre: 'pera', precio: 2.8, imagen: 'img/pera.jpg', categoria: 'frutas' }
-];
+// ===================================================================
+//  script.js  ·  Lógica de la tienda (productos, carrito y slider)
+// ===================================================================
+import { getProductos } from './productos.js';
 
-function getProductos() {
-    const ps = document.querySelectorAll('#productos-container .producto');
-    if (ps.length > 0) {
-        return Array.from(ps).map((p, i) => ({
-            id: i + 1,
-            nombre: p.querySelector('h3').textContent,
-            precio: parseFloat(p.querySelector('.producto-precio')?.textContent?.replace('€','') || p.querySelectorAll('p')[1].textContent.replace('€','')),
-            imagen: p.querySelector('img').src,
-            categoria: p.querySelectorAll('p')[0].textContent
-        }));
-    }
-    return [];
+const CART_KEY = 'carrito';
+
+/* ----------------------------- Avisos ----------------------------- */
+
+function showMsg(texto, color = '#386641') {
+    const div = document.createElement('div');
+    div.textContent = texto;
+    div.style.cssText =
+        `position:fixed;top:20px;right:20px;background:${color};color:#fff;` +
+        'padding:12px 20px;border-radius:8px;z-index:9999;' +
+        'box-shadow:0 4px 12px rgba(0,0,0,.25);font-family:inherit;';
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 2200);
 }
 
+/* ----------------------------- Carrito ---------------------------- */
+
 function getCarrito() {
-    return JSON.parse(localStorage.getItem('carrito')) || [];
+    try {
+        const c = JSON.parse(localStorage.getItem(CART_KEY));
+        return Array.isArray(c) ? c : [];
+    } catch (e) {
+        return [];
+    }
 }
 
 function saveCarrito(carrito) {
-    localStorage.setItem('carrito', JSON.stringify(carrito));
+    localStorage.setItem(CART_KEY, JSON.stringify(carrito));
 }
 
-function addCarrito(producto) {
+function totalCarrito() {
+    return getCarrito().reduce(
+        (total, p) => total + (Number(p.precio) || 0) * (p.cantidad || 1),
+        0
+    );
+}
+
+function addCarritoById(id) {
+    const producto = getProductos().find(p => String(p.id) === String(id));
+    if (!producto) return;
+
     const items = getCarrito();
-    const existing = items.find(p => p.id === producto.id);
-    if (existing) {
-        existing.cantidad = (existing.cantidad || 1) + 1;
-    } else {
-        items.push({ ...producto, cantidad: 1 });
-    }
-    saveCarrito(items);
-    showMsg('Añadido al carrito');
-}
+    const existente = items.find(i => String(i.id) === String(id));
 
-function showMsg(texto) {
-    const div = document.createElement('div');
-    div.style.cssText = 'position:fixed;top:20px;right:20px;background:#386641;color:white;padding:10px 20px;border-radius:8px;z-index:9999;';
-    div.textContent = texto;
-    document.body.appendChild(div);
-    setTimeout(() => div.remove(), 2000);
+    if (existente) {
+        existente.cantidad = (existente.cantidad || 1) + 1;
+    } else {
+        items.push({
+            id: producto.id,
+            nombre: producto.nombre,
+            precio: Number(producto.precio) || 0,
+            imagen: producto.imagen,
+            categoria: producto.categoria,
+            cantidad: 1
+        });
+    }
+
+    saveCarrito(items);
+    actualizarContador();
+    showMsg('✅ ' + producto.nombre + ' añadido al carrito');
 }
 
 function removeCarrito(id) {
-    let items = getCarrito();
-    items = items.filter(p => p.id !== id);
-    saveCarrito(items);
+    saveCarrito(getCarrito().filter(p => String(p.id) !== String(id)));
+    renderCarrito();
+    actualizarContador();
+}
+
+function cambiarCantidad(id, delta) {
+    const items = getCarrito();
+    const item = items.find(p => String(p.id) === String(id));
+    if (!item) return;
+
+    item.cantidad = (item.cantidad || 1) + delta;
+
+    if (item.cantidad <= 0) {
+        saveCarrito(items.filter(p => String(p.id) !== String(id)));
+    } else {
+        saveCarrito(items);
+    }
+
+    renderCarrito();
+    actualizarContador();
 }
 
 function vaciarCarrito() {
-    localStorage.removeItem('carrito');
+    localStorage.removeItem(CART_KEY);
+    renderCarrito();
+    actualizarContador();
 }
 
-window.addCarritoById = function(id) {
-    const p = getProductos().find(x => x.id === id);
-    if (p) addCarrito(p);
+// Muestra el número de artículos en el icono del carrito (si existe).
+function actualizarContador() {
+    const n = getCarrito().reduce((a, p) => a + (p.cantidad || 1), 0);
+    document.querySelectorAll('[data-cart-count]').forEach(el => {
+        el.textContent = n;
+        el.style.display = n > 0 ? 'inline-block' : 'none';
+    });
 }
+
+/* ---------------------------- Productos --------------------------- */
 
 let filtroActual = 'todos';
 
-window.filtrar = function(cat, event) {
-    filtroActual = cat;
-    document.querySelectorAll('.filtro-btn').forEach(btn => btn.classList.remove('active'));
-    if (event && event.target) event.target.classList.add('active');
-    render();
+function renderProductos(categoria) {
+    const cont = document.getElementById('productos-container');
+    if (!cont) return;
+
+    filtroActual = categoria || filtroActual;
+
+    const productos = getProductos().filter(
+        p => filtroActual === 'todos' || p.categoria === filtroActual
+    );
+
+    if (productos.length === 0) {
+        cont.innerHTML = '<p style="grid-column:1/-1;text-align:center;">No hay productos en esta categoría.</p>';
+        return;
+    }
+
+    cont.innerHTML = productos.map(p => `
+        <article class="producto">
+            <img src="${p.imagen}" alt="${p.nombre}" class="producto-img" loading="lazy"
+                 onerror="this.onerror=null;this.src='img/juan.jpg'">
+            <div class="producto-content">
+                <h3>${p.nombre}</h3>
+                <p>${p.categoria}</p>
+                <p class="producto-precio">${(Number(p.precio) || 0).toFixed(2)} €</p>
+                <button class="btn btn-primary" data-add="${p.id}">Añadir</button>
+            </div>
+        </article>
+    `).join('');
 }
 
-function render() {
-    const container = document.getElementById('productos-container');
-    if (container && container.children.length === 0) {
-        const ps = getProductos();
-        const filtrados = filtroActual === 'todos' ? ps : ps.filter(p => p.categoria === filtroActual);
-        container.innerHTML = filtrados.map(p => `
-            <article class="producto">
-                <img src="${p.imagen}" alt="${p.nombre}" class="producto-img">
-                <div class="producto-content">
-                    <h3>${p.nombre}</h3>
-                    <p>${p.categoria}</p>
-                    <p>${p.precio} €</p>
-                    <button class="btn btn-primary" onclick="addCarritoById(${p.id})">Añadir</button>
-                </div>
-            </article>
-        `).join('');
+/* ----------------------------- Carrito (página) ------------------- */
+
+function renderCarrito() {
+    const cont = document.getElementById('carrito-container');
+    if (!cont) return;
+
+    const items = getCarrito();
+    const totalEl = document.getElementById('carrito-total-amount');
+    const totalBox = document.getElementById('carrito-total');
+    const checkoutLink = document.getElementById('checkout-link');
+
+    if (items.length === 0) {
+        cont.innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;padding:40px;">
+                <p style="font-size:1.2rem;">Tu carrito está vacío 🛒</p>
+                <a href="index.html" class="btn btn-primary" style="margin-top:20px;display:inline-block;">🌱 Ver productos</a>
+            </div>`;
+        if (totalBox) totalBox.style.display = 'none';
+        if (checkoutLink) checkoutLink.style.display = 'none';
+        return;
     }
-    
-    const c = document.getElementById('carrito-container');
-    if (c) {
-        const items = getCarrito();
-        if (items.length === 0) {
-            c.innerHTML = '<p>Carrito vacío</p>';
-        } else {
-            let total = 0;
-            c.innerHTML = items.map(p => {
-                total += p.precio * (p.cantidad || 1);
-                return `<div style="display:flex;justify-content:space-between;padding:5px;border-bottom:1px solid #eee;">
-                    <span>${p.nombre} x${p.cantidad || 1}</span>
-                    <span>${(p.precio * (p.cantidad || 1)).toFixed(2)} € <button onclick="removeCarrito(${p.id});location.reload();" style="background:red;color:white;border:none;padding:2px 8px;">X</button></span>
-                </div>`;
-            }).join('') + `<div style="font-weight:bold;margin-top:10px;">Total: ${total.toFixed(2)} €</div>
-            <a href="checkout.html" class="btn btn-primary" style="display:block;margin-top:10px;text-align:center;">Continuar</a>`;
-        }
-    }
+
+    if (totalBox) totalBox.style.display = 'block';
+    if (checkoutLink) checkoutLink.style.display = 'inline-block';
+
+    cont.innerHTML = items.map(p => `
+        <div class="carrito-item" style="display:flex;align-items:center;gap:15px;padding:12px;border-bottom:1px solid #eee;width:100%;">
+            <img src="${p.imagen}" alt="${p.nombre}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;">
+            <div style="flex:1;text-align:left;">
+                <strong>${p.nombre}</strong><br>
+                <small>${(Number(p.precio) || 0).toFixed(2)} € / unidad</small>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <button class="btn btn-outline" data-menos="${p.id}" style="padding:2px 10px;">−</button>
+                <span>${p.cantidad || 1}</span>
+                <button class="btn btn-outline" data-mas="${p.id}" style="padding:2px 10px;">+</button>
+            </div>
+            <div style="min-width:90px;text-align:right;font-weight:bold;">
+                ${((Number(p.precio) || 0) * (p.cantidad || 1)).toFixed(2)} €
+            </div>
+            <button class="btn btn-outline" data-remove="${p.id}" title="Quitar"
+                    style="color:#c0392b;border-color:#c0392b;padding:6px 10px;">🗑️</button>
+        </div>
+    `).join('');
+
+    if (totalEl) totalEl.textContent = totalCarrito().toFixed(2);
 }
 
-document.addEventListener('DOMContentLoaded', render);
+/* ------------------------- Delegación de clics -------------------- */
 
-const sliderWrapper = document.getElementById('slider-wrapper');
-if (sliderWrapper) {
-    let currentSlide = 0;
-    const slides = sliderWrapper.querySelectorAll('.slide');
-    const totalSlides = slides.length;
-    const progressBar = document.getElementById('slider-progress');
+document.addEventListener('click', e => {
+    const t = e.target.closest('[data-add],[data-remove],[data-mas],[data-menos],[data-filter],[data-vaciar]');
+    if (!t) return;
+
+    if (t.dataset.vaciar !== undefined)  vaciarCarrito();
+    if (t.dataset.add !== undefined)     addCarritoById(t.dataset.add);
+    if (t.dataset.remove !== undefined)  removeCarrito(t.dataset.remove);
+    if (t.dataset.mas !== undefined)     cambiarCantidad(t.dataset.mas, 1);
+    if (t.dataset.menos !== undefined)   cambiarCantidad(t.dataset.menos, -1);
+
+    if (t.dataset.filter !== undefined) {
+        document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+        t.classList.add('active');
+        renderProductos(t.dataset.filter);
+    }
+});
+
+/* ------------------------------- Slider --------------------------- */
+
+function initSlider() {
+    const wrapper = document.querySelector('.slider-wrapper');
+    if (!wrapper) return;
+
+    const slides = wrapper.querySelectorAll('.slide');
+    const total = slides.length;
+    if (total === 0) return;
+
+    const progress = document.querySelector('#slider-progress');
     const dots = document.querySelectorAll('.dot');
+    let actual = 0;
 
-    function goToSlide(index) {
-        currentSlide = ((index % totalSlides) + totalSlides) % totalSlides;
-        sliderWrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
-        
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === currentSlide);
-            dot.setAttribute('aria-selected', i === currentSlide);
+    const ir = index => {
+        actual = ((index % total) + total) % total;
+        wrapper.style.transform = `translateX(-${actual * 100}%)`;
+        dots.forEach((d, i) => {
+            d.classList.toggle('active', i === actual);
+            d.setAttribute('aria-selected', i === actual);
         });
-        
-        if (progressBar) {
-            progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
-        }
-    }
+        if (progress) progress.style.width = `${((actual + 1) / total) * 100}%`;
+    };
 
-    document.querySelector('.slider-btn.prev')?.addEventListener('click', () => {
-        goToSlide(currentSlide - 1);
-        resetAutoSlide();
-    });
+    document.querySelector('.slider-btn.prev')?.addEventListener('click', () => { ir(actual - 1); reiniciar(); });
+    document.querySelector('.slider-btn.next')?.addEventListener('click', () => { ir(actual + 1); reiniciar(); });
+    dots.forEach((d, i) => d.addEventListener('click', () => { ir(i); reiniciar(); }));
 
-    document.querySelector('.slider-btn.next')?.addEventListener('click', () => {
-        goToSlide(currentSlide + 1);
-        resetAutoSlide();
-    });
+    let intervalo;
+    const auto = () => { intervalo = setInterval(() => ir(actual + 1), 5000); };
+    const reiniciar = () => { clearInterval(intervalo); auto(); };
 
-    dots.forEach((dot, index) => {
-        dot.addEventListener('click', () => {
-            goToSlide(index);
-            resetAutoSlide();
-        });
-    });
-
-    let autoSlideInterval;
-    function startAutoSlide() {
-        autoSlideInterval = setInterval(() => {
-            goToSlide(currentSlide + 1);
-        }, 5000);
-    }
-
-    function resetAutoSlide() {
-        clearInterval(autoSlideInterval);
-        startAutoSlide();
-    }
-
-    startAutoSlide();
+    auto();
 }
 
-const menuToggle = document.querySelector('.menu-toggle');
-const navList = document.querySelector('.nav-list');
+/* ------------------------------- Menú móvil ----------------------- */
 
-if (menuToggle && navList) {
-    menuToggle.addEventListener('click', () => {
-        navList.classList.toggle('active');
-        const isExpanded = navList.classList.contains('active');
-        menuToggle.setAttribute('aria-expanded', isExpanded);
+function initMenu() {
+    const toggle = document.querySelector('.menu-toggle');
+    const nav = document.querySelector('.nav-list');
+    if (!toggle || !nav) return;
+
+    toggle.addEventListener('click', () => {
+        nav.classList.toggle('active');
+        toggle.setAttribute('aria-expanded', nav.classList.contains('active'));
     });
 }
+
+/* ------------------------------- Arranque ------------------------- */
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderProductos();
+    renderCarrito();
+    actualizarContador();
+    initSlider();
+    initMenu();
+});
+
+// Funciones expuestas por si algún enlace antiguo las llama desde el HTML
+window.addCarritoById = addCarritoById;
+window.vaciarCarrito = vaciarCarrito;
+window.renderCarrito = renderCarrito;

@@ -6,7 +6,7 @@
     <title>Carrito - Huerto de Juan</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
     <link rel="stylesheet" href="style.css">
-    <script src="./script.js" defer></script>
+    <script type="module" src="./script.js"></script>
 </head>
 
 <body>
@@ -25,15 +25,16 @@
         <div class="container">
             <h1 class="section-title">🛒 Tu Carrito</h1>
 
-            <div class="productos-grid" id="carrito-container" style="max-width: 800px; margin: 0 auto;">
-            </div>
+            <div id="carrito-container" style="max-width: 800px; margin: 0 auto; background: var(--color-card, #fff); border-radius: 12px; padding: 10px 20px;"></div>
 
-            <div id="carrito-total" style="text-align: center; margin: var(--space-xl) 0;">
-                <p class="producto-precio">Total: <span id="carrito-total-amount">0</span> €</p>
+            <div id="carrito-total" style="text-align: center; margin: var(--space-xl) 0; display: none;">
+                <p class="producto-precio" style="font-size: 1.4rem;">
+                    Total: <span id="carrito-total-amount">0</span> €
+                </p>
 
                 <div style="display: flex; gap: var(--space-md); justify-content: center; margin-top: var(--space-lg); flex-wrap: wrap;">
                     <a href="checkout.html" class="btn btn-primary" id="checkout-link">💳 Finalizar Compra</a>
-                    <button type="button" class="btn btn-outline" onclick="vaciarCarrito(); renderCarrito();">🗑️ Vaciar</button>
+                    <button type="button" class="btn btn-outline" data-vaciar>🗑️ Vaciar carrito</button>
                 </div>
             </div>
         </div>

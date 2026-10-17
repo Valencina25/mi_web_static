@@ -1,17 +1,13 @@
 {
-  "name": "tienda-huerto-juan",
+  "name": "mi_web_static",
   "version": "1.0.0",
-  "description": "Tienda online dinámica del Huerto de Juan (Node.js + PostgreSQL)",
-  "main": "server.js",
-  "engines": {
-    "node": ">=18"
-  },
+  "description": "Tienda online del Huerto de Juan (web estática para GitHub Pages)",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "python3 -m http.server 3000"
   },
   "repository": {
     "type": "git",
@@ -20,13 +16,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "pg": "^8.11.3"
-  },
-  "bugs": {
-    "url": "https://github.com/Valencina25/mi_web_static/issues"
-  },
-  "homepage": "https://github.com/Valencina25/mi_web_static#readme",
+  "homepage": "https://valencina25.github.io/mi_web_static/",
   "devDependencies": {
     "vite": "^8.0.10"
   }

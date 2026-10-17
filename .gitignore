@@ -1,5 +1,8 @@
 node_modules
-*.json
+dist
 .env
-!.gitignore
-!package.json
+*.log
+
+# Datos del servidor antiguo (si se usa Node)
+pedidos.json
+mensajes.json

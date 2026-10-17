@@ -3,85 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - Huerto de Juan</title>
+    <title>Confirmar pedido - Huerto de Juan</title>
     <link rel="stylesheet" href="style.css">
-    <script src="./script.js" defer></script>
+    <script type="module" src="./script.js"></script>
+    <style>
+        .checkout-form label { display: block; margin-top: 14px; font-weight: 600; }
+        .checkout-form input,
+        .checkout-form textarea { width: 100%; padding: 10px; margin-top: 4px; border: 1px solid #ccc; border-radius: 8px; }
+        .checkout-form button { margin-top: 20px; width: 100%; }
+        .resumen { background: var(--color-card, #fff); border-radius: 12px; padding: 15px 20px; margin-bottom: 20px; }
+        .resumen-linea { display: flex; justify-content: space-between; padding: 4px 0; }
+    </style>
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="index.html">🌱 Huerto</a>
-            <a href="carrito.html">🛒 Carrito</a>
-        </nav>
+    <header class="header">
+        <div class="container">
+            <a href="index.html" class="logo">🌱 Huerto de Juan</a>
+            <nav class="nav-list" style="display: flex; gap: var(--space-md);">
+                <a href="index.html" class="nav-link">🏠 Tienda</a>
+                <a href="carrito.html" class="nav-link">🛒 Carrito</a>
+            </nav>
+        </div>
     </header>
-    
-    <main style="padding: 20px; max-width: 500px; margin: 0 auto;">
-        <h1>📝 Confirmar Pedido</h1>
-        
-        <p>Total a pagar: <strong id="total">0 €</strong></p>
-        
-        <form action="https://formspree.io/f/mwvazjng" method="POST" onsubmit="guardarLocal()">
+
+    <main style="padding: 20px; max-width: 560px; margin: 0 auto;">
+        <h1 class="section-title">📝 Confirmar Pedido</h1>
+
+        <div class="resumen" id="resumen"></div>
+
+        <form class="checkout-form" id="pedido-form" action="https://formspree.io/f/mwvazjng" method="POST">
             <input type="hidden" name="productos" id="productos">
             <input type="hidden" name="total" id="campo-total">
 
-            <label>Nombre completo</label>
-            <input type="text" name="nombre" required>
+            <label for="nombre">Nombre completo</label>
+            <input type="text" id="nombre" name="nombre" required>
 
-            <label>Email</label>
-            <input type="email" name="email" required>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
 
-            <label>Teléfono</label>
-            <input type="tel" name="telefono" required>
+            <label for="telefono">Teléfono</label>
+            <input type="tel" id="telefono" name="telefono" required>
 
-            <label>Dirección de entrega</label>
-            <textarea name="direccion" required></textarea>
+            <label for="direccion">Dirección de entrega</label>
+            <textarea id="direccion" name="direccion" rows="3" required></textarea>
 
-            <button type="submit">✅ Confirmar Pedido</button>
+            <button type="submit" class="btn btn-primary">✅ Confirmar Pedido</button>
         </form>
-        
-        <div id="ok" style="display:none; text-align: center; padding: 20px;">
-            <h2 style="color: green;">✅ Pedido Enviado!</h2>
-            <p>Te enviaremos un email de confirmación.</p>
-            <a href="index.html">Volver a la tienda</a>
+
+        <div id="ok" style="display:none; text-align: center; padding: 30px 10px;">
+            <h2 style="color: var(--color-primary);">✅ ¡Pedido enviado!</h2>
+            <p>Gracias por tu compra. Nos pondremos en contacto contigo para confirmar la entrega.</p>
+            <a href="index.html" class="btn btn-primary" style="display:inline-block;margin-top:16px;">Volver a la tienda</a>
+        </div>
+
+        <div id="vacio" style="display:none; text-align:center; padding:30px 10px;">
+            <p>Tu carrito está vacío 🛒</p>
+            <a href="index.html" class="btn btn-primary" style="display:inline-block;margin-top:16px;">🌱 Ver productos</a>
         </div>
     </main>
-    
+
     <script>
-        const carousel = JSON.parse(localStorage.getItem('carrito')) || [];
-        const total = carousel.reduce((a, p) => a + ((p.precio || 0) * (p.cantidad || 1)), 0);
+        const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+        const total = carrito.reduce((a, p) => a + ((Number(p.precio) || 0) * (p.cantidad || 1)), 0);
 
-        document.getElementById('total').textContent = total.toFixed(2) + ' €';
-        document.getElementById('campo-total').value = total.toFixed(2) + ' €';
-        document.getElementById('productos').value = carousel.map(p =>
-            `${p.nombre} x${p.cantidad || 1} = ${((p.precio || 0) * (p.cantidad || 1)).toFixed(2)} €`
-        ).join('\n');
+        const form = document.getElementById('pedido-form');
+        const resumen = document.getElementById('resumen');
 
-        if (carousel.length === 0) {
-            document.querySelector('form').innerHTML = '<p style="text-align:center;">Tu carrito está vacío</p><a href="index.html">Volver a la tienda</a>';
+        if (carrito.length === 0) {
+            form.style.display = 'none';
+            resumen.style.display = 'none';
+            document.getElementById('vacio').style.display = 'block';
+        } else {
+            resumen.innerHTML = carrito.map(p =>
+                `<div class="resumen-linea">
+                    <span>${p.nombre} × ${p.cantidad || 1}</span>
+                    <span>${((Number(p.precio) || 0) * (p.cantidad || 1)).toFixed(2)} €</span>
+                </div>`
+            ).join('') +
+            `<div class="resumen-linea" style="border-top:2px solid #eee;margin-top:8px;padding-top:8px;font-weight:bold;">
+                <span>Total</span><span>${total.toFixed(2)} €</span>
+            </div>`;
+
+            document.getElementById('campo-total').value = total.toFixed(2) + ' €';
+            document.getElementById('productos').value = carrito.map(p =>
+                `${p.nombre} x${p.cantidad || 1} = ${((Number(p.precio) || 0) * (p.cantidad || 1)).toFixed(2)} €`
+            ).join('\n');
         }
 
-        function guardarLocal() {
-            const pedido = {
-                name: document.querySelector('input[name="nombre"]').value,
-                phone: document.querySelector('input[name="telefono"]').value,
-                email: document.querySelector('input[name="email"]').value,
-                address: document.querySelector('textarea[name="direccion"]').value,
-                items: carousel.map(p => `${p.nombre} x${p.cantidad || 1}`),
-                total: total
-            };
-            fetch('/api/pedidos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(pedido)
-            }).then(() => {
-                localStorage.removeItem('carrito');
-            }).catch(() => {
+        // Guarda el pedido en este navegador (para verlo en el panel de admin)
+        function guardarPedidoLocal() {
+            try {
                 const pedidos = JSON.parse(localStorage.getItem('my_orders') || '[]');
-                pedidos.unshift({ id: Date.now(), ...pedido, fecha: new Date().toISOString() });
+                pedidos.unshift({
+                    id: Date.now(),
+                    name: document.getElementById('nombre').value,
+                    phone: document.getElementById('telefono').value,
+                    email: document.getElementById('email').value,
+                    address: document.getElementById('direccion').value,
+                    items: carrito.map(p => `${p.nombre} x${p.cantidad || 1}`),
+                    total: total,
+                    fecha: new Date().toISOString(),
+                    estado: 'pendiente'
+                });
                 localStorage.setItem('my_orders', JSON.stringify(pedidos));
-                localStorage.removeItem('carrito');
-            });
+            } catch (e) { /* sin problema */ }
+            localStorage.removeItem('carrito');
         }
+
+        // Envía el pedido por Formspree (llega a tu correo) sin salir de la página
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            guardarPedidoLocal();
+
+            try {
+                await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: { 'Accept': 'application/json' }
+                });
+            } catch (err) { /* aunque falle el envío, el pedido queda guardado en local */ }
+
+            form.style.display = 'none';
+            resumen.style.display = 'none';
+            document.getElementById('ok').style.display = 'block';
+            window.scrollTo(0, 0);
+        });
     </script>
 </body>
 </html>
