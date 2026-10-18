@@ -585,6 +585,14 @@ ul, ol {
 /* ================================
    FILTROS
    ================================ */
+.filtros-titulo {
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: var(--space-sm);
+  color: var(--color-primary-dark);
+}
+
 .filtros {
   display: flex;
   flex-wrap: wrap;
